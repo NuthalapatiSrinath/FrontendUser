@@ -32,18 +32,17 @@ export function formatDateTime(dateStr) {
 
   const date = new Date(dateStr);
   const options = {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   };
 
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString("en-US", options);
 }
 
 /**
  * Legacy export for backward compatibility
  */
 export const formatDistanceToNow = formatTimeFromNow;
-

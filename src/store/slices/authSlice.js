@@ -22,12 +22,9 @@ export const loginUser = createAsyncThunk(
 // --- Async Thunk for User Registration ---
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
-  async ({ username, email, password, referralCode }, { rejectWithValue }) => {
+  async ({ username, password, confirmPassword }, { rejectWithValue }) => {
     try {
-      const payload = { username, email, password };
-      if (referralCode) {
-        payload.referralCode = referralCode;
-      }
+      const payload = { username, password, confirmPassword };
       const response = await api.post("/user/auth/register", payload);
       return response.data;
     } catch (error) {

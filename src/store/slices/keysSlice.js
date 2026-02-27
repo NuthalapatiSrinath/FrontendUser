@@ -10,10 +10,10 @@ export const fetchMyKeys = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to load keys"
+        error.response?.data?.message || "Failed to load keys",
       );
     }
-  }
+  },
 );
 
 // Fetch available keys grouped by game
@@ -25,10 +25,10 @@ export const fetchAvailableKeys = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to load available keys"
+        error.response?.data?.message || "Failed to load available keys",
       );
     }
-  }
+  },
 );
 
 // Generate (purchase) a key
@@ -40,10 +40,10 @@ export const generateKey = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to generate key"
+        error.response?.data?.message || "Failed to generate key",
       );
     }
-  }
+  },
 );
 
 // Delete a key
@@ -55,10 +55,10 @@ export const deleteKey = createAsyncThunk(
       return { keyId, ...res.data };
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to delete key"
+        error.response?.data?.message || "Failed to delete key",
       );
     }
-  }
+  },
 );
 
 const keysSlice = createSlice({
@@ -125,7 +125,9 @@ const keysSlice = createSlice({
       })
       .addCase(deleteKey.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.myKeys = state.myKeys.filter(key => key._id !== action.payload.keyId);
+        state.myKeys = state.myKeys.filter(
+          (key) => key._id !== action.payload.keyId,
+        );
       })
       .addCase(deleteKey.rejected, (state, action) => {
         state.isLoading = false;

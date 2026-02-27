@@ -10,10 +10,10 @@ export const fetchDashboard = createAsyncThunk(
       return res.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message || "Failed to load dashboard"
+        error.response?.data?.message || "Failed to load dashboard",
       );
     }
-  }
+  },
 );
 
 const dashboardSlice = createSlice({
