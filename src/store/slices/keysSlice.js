@@ -46,6 +46,21 @@ export const generateKey = createAsyncThunk(
   }
 );
 
+// Delete a key
+export const deleteKey = createAsyncThunk(
+  "keys/deleteKey",
+  async (keyId, { rejectWithValue }) => {
+    try {
+      const res = await api.delete(`/user/keys/${keyId}`);
+      return { keyId, ...res.data };
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete key"
+      );
+    }
+  }
+);
+
 const keysSlice = createSlice({
   name: "keys",
   initialState: {
@@ -103,9 +118,24 @@ const keysSlice = createSlice({
       .addCase(generateKey.rejected, (state, action) => {
         state.generateLoading = false;
         state.error = action.payload;
+      })
+      // Delete key
+      .addCase(deleteKey.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteKey.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.myKeys = state.myKeys.filter(key => key._id !== action.payload.keyId);
+      })
+      .addCase(deleteKey.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
       });
   },
 });
 
 export const { clearKeysError, clearLastGenerated } = keysSlice.actions;
 export default keysSlice.reducer;
+
+// Export alias for compatibility
+export const getKeys = fetchMyKeys;

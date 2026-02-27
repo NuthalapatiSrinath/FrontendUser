@@ -19,6 +19,24 @@ export const loginUser = createAsyncThunk(
   },
 );
 
+// --- Async Thunk for User Registration ---
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
+  async ({ username, email, password, referralCode }, { rejectWithValue }) => {
+    try {
+      const payload = { username, email, password };
+      if (referralCode) {
+        payload.referralCode = referralCode;
+      }
+      const response = await api.post("/user/auth/register", payload);
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Registration failed";
+      return rejectWithValue(message);
+    }
+  },
+);
+
 // --- Initial State ---
 const userData = localStorage.getItem("user_data")
   ? JSON.parse(localStorage.getItem("user_data"))
@@ -31,6 +49,7 @@ const initialState = {
   isAuthenticated: !!token,
   isLoading: false,
   error: null,
+  isRegistered: false,
 };
 
 const authSlice = createSlice({
@@ -47,6 +66,9 @@ const authSlice = createSlice({
     },
     clearError: (state) => {
       state.error = null;
+    },
+    clearRegistered: (state) => {
+      state.isRegistered = false;
     },
   },
   extraReducers: (builder) => {
@@ -70,9 +92,24 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
         toast.error(action.payload);
+      })
+      // Register User
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isRegistered = true;
+        toast.success("Registration successful! Please login.");
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, clearRegistered } = authSlice.actions;
 export default authSlice.reducer;

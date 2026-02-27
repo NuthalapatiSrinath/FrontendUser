@@ -1,7 +1,11 @@
 /**
- * Simple time utility - formats date to relative time string
+ * Time utility functions for formatting dates and times
  */
-export function formatDistanceToNow(dateStr) {
+
+/**
+ * Formats date to relative time string (e.g., "2 hours ago")
+ */
+export function formatTimeFromNow(dateStr) {
   if (!dateStr) return "N/A";
 
   const date = new Date(dateStr);
@@ -19,3 +23,27 @@ export function formatDistanceToNow(dateStr) {
 
   return date.toLocaleDateString();
 }
+
+/**
+ * Formats date to readable date and time string
+ */
+export function formatDateTime(dateStr) {
+  if (!dateStr) return "N/A";
+
+  const date = new Date(dateStr);
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+
+  return date.toLocaleDateString('en-US', options);
+}
+
+/**
+ * Legacy export for backward compatibility
+ */
+export const formatDistanceToNow = formatTimeFromNow;
+

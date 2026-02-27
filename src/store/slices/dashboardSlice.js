@@ -50,3 +50,6 @@ const dashboardSlice = createSlice({
 
 export const { clearDashboard } = dashboardSlice.actions;
 export default dashboardSlice.reducer;
+
+// Export alias for compatibility
+export const getDashboard = fetchDashboard;
