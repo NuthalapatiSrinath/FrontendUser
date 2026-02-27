@@ -269,7 +269,7 @@ export default function Login() {
           <KeyRound className="h-5 w-5 text-white" />
         </motion.div>
         <span className="text-white text-lg font-bold tracking-wide">
-          ELEVEN-PANEL
+          PANEL RED
         </span>
         <motion.div
           className="ml-auto flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs text-white/90"
@@ -439,7 +439,7 @@ export default function Login() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        © {new Date().getFullYear()} Eleven Panel. All rights reserved.
+        © {new Date().getFullYear()} Panel Red. All rights reserved.
       </motion.footer>
 
       {/* ── Global CSS for blob animation ── */}

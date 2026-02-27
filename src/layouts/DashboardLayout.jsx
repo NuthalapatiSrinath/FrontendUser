@@ -70,7 +70,7 @@ const DashboardLayout = () => {
                   <Mountain className="w-5 h-5" />
                 </div>
                 <span className="text-lg font-bold tracking-wide hidden sm:block">
-                  ELEVEN
+                  PANEL RED
                 </span>
               </Link>
 
@@ -168,7 +168,7 @@ const DashboardLayout = () => {
       <footer className="text-center py-4 text-xs text-slate-400 border-t border-slate-200/60">
         <div className="flex items-center justify-center gap-2">
           <Mountain className="w-3.5 h-3.5" />
-          <span>&copy; {new Date().getFullYear()} ELEVEN-PANEL</span>
+          <span>&copy; {new Date().getFullYear()} PANEL RED</span>
         </div>
       </footer>
     </div>
