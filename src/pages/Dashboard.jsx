@@ -1,14 +1,66 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useSpring } from "framer-motion";
 import {
-  User, Mail, Calendar, Clock, Key, Shield, Activity, TrendingUp,
-  Wallet, CreditCard, History, ChevronRight, ChevronLeft, Sparkles,
-  Star, Zap, Award, Crown, Target, BarChart2, PieChart, ArrowUpRight,
-  ArrowDownRight, RefreshCw, Eye, EyeOff, Copy, CheckCircle, AlertCircle,
-  Circle, Hexagon, Triangle, Diamond, Layers, Cpu, Globe, Server,
-  Database, Cloud, Wifi, Gift, Rocket, Heart, Moon, Sun, Package,
-  Hash, Timer, PlayCircle, PauseCircle, Settings, Bell, Search
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useMotionTemplate,
+  useSpring,
+} from "framer-motion";
+import {
+  User,
+  Mail,
+  Calendar,
+  Clock,
+  Key,
+  Shield,
+  Activity,
+  TrendingUp,
+  Wallet,
+  CreditCard,
+  History,
+  ChevronRight,
+  ChevronLeft,
+  Sparkles,
+  Star,
+  Zap,
+  Award,
+  Crown,
+  Target,
+  BarChart2,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCw,
+  Eye,
+  EyeOff,
+  Copy,
+  CheckCircle,
+  AlertCircle,
+  Circle,
+  Hexagon,
+  Triangle,
+  Diamond,
+  Layers,
+  Cpu,
+  Globe,
+  Server,
+  Database,
+  Cloud,
+  Wifi,
+  Gift,
+  Rocket,
+  Heart,
+  Moon,
+  Sun,
+  Package,
+  Hash,
+  Timer,
+  PlayCircle,
+  PauseCircle,
+  Settings,
+  Bell,
+  Search,
 } from "lucide-react";
 import { getDashboard } from "../store/slices/dashboardSlice";
 import { formatTimeFromNow, formatDateTime } from "../utils/timeUtils";
@@ -22,7 +74,11 @@ const pageVariants = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.1 },
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.1,
+    },
   },
   exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
 };
@@ -61,11 +117,15 @@ const statCardVariants = {
 
 const tableRowVariants = {
   initial: { opacity: 0, x: -30 },
-  animate: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 20 } },
-  hover: { 
-    backgroundColor: "rgba(59, 130, 246, 0.05)", 
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { type: "spring", stiffness: 100, damping: 20 },
+  },
+  hover: {
+    backgroundColor: "rgba(59, 130, 246, 0.05)",
     x: 5,
-    transition: { duration: 0.2 } 
+    transition: { duration: 0.2 },
   },
   exit: { opacity: 0, x: 30 },
 };
@@ -100,7 +160,11 @@ const staggerContainerVariants = {
 
 const staggerItemVariants = {
   initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
+  },
 };
 
 const glowVariants = {
@@ -116,7 +180,11 @@ const glowVariants = {
 
 const counterVariants = {
   initial: { scale: 0.5, opacity: 0 },
-  animate: { scale: 1, opacity: 1, transition: { type: "spring", stiffness: 200, damping: 15 } },
+  animate: {
+    scale: 1,
+    opacity: 1,
+    transition: { type: "spring", stiffness: 200, damping: 15 },
+  },
 };
 
 // ============================================================================
@@ -199,7 +267,12 @@ const FloatingParticles = () => {
 // ANIMATED NUMBER COUNTER
 // ============================================================================
 
-const AnimatedCounter = ({ value, prefix = "", suffix = "", duration = 1.5 }) => {
+const AnimatedCounter = ({
+  value,
+  prefix = "",
+  suffix = "",
+  duration = 1.5,
+}) => {
   const [displayValue, setDisplayValue] = useState(0);
 
   useEffect(() => {
@@ -234,7 +307,15 @@ const AnimatedCounter = ({ value, prefix = "", suffix = "", duration = 1.5 }) =>
 // STAT CARD COMPONENT
 // ============================================================================
 
-const StatCard = ({ icon: Icon, label, value, trend, trendValue, color, delay = 0 }) => {
+const StatCard = ({
+  icon: Icon,
+  label,
+  value,
+  trend,
+  trendValue,
+  color,
+  delay = 0,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const colorClasses = {
@@ -286,7 +367,11 @@ const StatCard = ({ icon: Icon, label, value, trend, trendValue, color, delay = 
             className="text-2xl font-bold text-slate-800 mb-2"
             animate={{ scale: isHovered ? 1.05 : 1 }}
           >
-            {typeof value === "number" ? <AnimatedCounter value={value} /> : value}
+            {typeof value === "number" ? (
+              <AnimatedCounter value={value} />
+            ) : (
+              value
+            )}
           </motion.h3>
 
           {trend && (
@@ -342,10 +427,30 @@ const UserInfoCard = ({ user }) => {
   const [showDetails, setShowDetails] = useState(false);
 
   const infoItems = [
-    { icon: User, label: "Username", value: user?.username || "N/A", color: "text-blue-500" },
-    { icon: Mail, label: "Email", value: user?.email || "N/A", color: "text-indigo-500" },
-    { icon: Shield, label: "Role", value: user?.role || "user", color: "text-purple-500" },
-    { icon: Calendar, label: "Joined", value: user?.createdAt ? formatDateTime(user.createdAt) : "N/A", color: "text-emerald-500" },
+    {
+      icon: User,
+      label: "Username",
+      value: user?.username || "N/A",
+      color: "text-blue-500",
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: user?.email || "N/A",
+      color: "text-indigo-500",
+    },
+    {
+      icon: Shield,
+      label: "Role",
+      value: user?.role || "user",
+      color: "text-purple-500",
+    },
+    {
+      icon: Calendar,
+      label: "Joined",
+      value: user?.createdAt ? formatDateTime(user.createdAt) : "N/A",
+      color: "text-emerald-500",
+    },
   ];
 
   return (
@@ -461,7 +566,9 @@ const UserInfoCard = ({ user }) => {
                     <IconComponent className={`w-5 h-5 ${item.color}`} />
                     <div className="flex-1">
                       <p className="text-xs text-slate-400">{item.label}</p>
-                      <p className="text-sm font-medium text-slate-700">{item.value}</p>
+                      <p className="text-sm font-medium text-slate-700">
+                        {item.value}
+                      </p>
                     </div>
                   </motion.div>
                 );
@@ -528,7 +635,12 @@ const QuickStatsGrid = ({ stats }) => {
 // REGISTRATION TABLE COMPONENT
 // ============================================================================
 
-const RegistrationTable = ({ registrations, currentPage, totalPages, onPageChange }) => {
+const RegistrationTable = ({
+  registrations,
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   const [hoveredRow, setHoveredRow] = useState(null);
 
   const getStatusBadge = (hwid) => {
@@ -586,8 +698,12 @@ const RegistrationTable = ({ registrations, currentPage, totalPages, onPageChang
               <History className="w-5 h-5 text-white" />
             </motion.div>
             <div>
-              <h3 className="text-lg font-bold text-slate-800">Registration History</h3>
-              <p className="text-xs text-slate-500">Your recent key registrations</p>
+              <h3 className="text-lg font-bold text-slate-800">
+                Registration History
+              </h3>
+              <p className="text-xs text-slate-500">
+                Your recent key registrations
+              </p>
             </div>
           </div>
 
@@ -655,7 +771,9 @@ const RegistrationTable = ({ registrations, currentPage, totalPages, onPageChang
                   </td>
                   <td className="px-6 py-4">
                     <span className="text-sm text-slate-600 font-mono">
-                      {reg.hwid ? `${reg.hwid.slice(0, 12)}...` : "Not registered"}
+                      {reg.hwid
+                        ? `${reg.hwid.slice(0, 12)}...`
+                        : "Not registered"}
                     </span>
                   </td>
                   <td className="px-6 py-4">{getStatusBadge(reg.hwid)}</td>
@@ -689,8 +807,12 @@ const RegistrationTable = ({ registrations, currentPage, totalPages, onPageChang
           >
             <History className="w-8 h-8 text-slate-400" />
           </motion.div>
-          <h4 className="text-lg font-semibold text-slate-700 mb-1">No registrations yet</h4>
-          <p className="text-sm text-slate-500">Start by generating your first key</p>
+          <h4 className="text-lg font-semibold text-slate-700 mb-1">
+            No registrations yet
+          </h4>
+          <p className="text-sm text-slate-500">
+            Start by generating your first key
+          </p>
         </motion.div>
       )}
 
@@ -757,9 +879,24 @@ const RegistrationTable = ({ registrations, currentPage, totalPages, onPageChang
 
 const ActivityFeed = ({ activities }) => {
   const defaultActivities = [
-    { icon: Key, text: "Key generated", time: "2 min ago", color: "bg-blue-500" },
-    { icon: CheckCircle, text: "HWID registered", time: "1 hour ago", color: "bg-emerald-500" },
-    { icon: Award, text: "Account created", time: "2 days ago", color: "bg-purple-500" },
+    {
+      icon: Key,
+      text: "Key generated",
+      time: "2 min ago",
+      color: "bg-blue-500",
+    },
+    {
+      icon: CheckCircle,
+      text: "HWID registered",
+      time: "1 hour ago",
+      color: "bg-emerald-500",
+    },
+    {
+      icon: Award,
+      text: "Account created",
+      time: "2 days ago",
+      color: "bg-purple-500",
+    },
   ];
 
   const displayActivities = activities || defaultActivities;
@@ -811,7 +948,9 @@ const ActivityFeed = ({ activities }) => {
                 <IconComponent className="w-4 h-4 text-white" />
               </motion.div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-slate-700">{activity.text}</p>
+                <p className="text-sm font-medium text-slate-700">
+                  {activity.text}
+                </p>
                 <p className="text-xs text-slate-400">{activity.time}</p>
               </div>
               <ChevronRight className="w-4 h-4 text-slate-400" />
@@ -981,7 +1120,9 @@ const WelcomeHeader = ({ user }) => {
 
 const Dashboard = () => {
   const dispatch = useDispatch();
-  const { dashboard, isLoading, error } = useSelector((state) => state.dashboard);
+  const { dashboard, isLoading, error } = useSelector(
+    (state) => state.dashboard,
+  );
   const { user } = useSelector((state) => state.auth);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -1025,7 +1166,8 @@ const Dashboard = () => {
         <QuickStatsGrid
           stats={{
             totalKeys: dashboard?.keys?.length || 0,
-            activeKeys: dashboard?.registrations?.filter((r) => r.hwid)?.length || 0,
+            activeKeys:
+              dashboard?.registrations?.filter((r) => r.hwid)?.length || 0,
             balance: dashboard?.user?.balance || 0,
             registrations: dashboard?.registrations?.length || 0,
           }}
@@ -1044,7 +1186,9 @@ const Dashboard = () => {
             <RegistrationTable
               registrations={dashboard?.registrations}
               currentPage={currentPage}
-              totalPages={Math.ceil((dashboard?.registrations?.length || 0) / 10)}
+              totalPages={Math.ceil(
+                (dashboard?.registrations?.length || 0) / 10,
+              )}
               onPageChange={handlePageChange}
             />
           </div>

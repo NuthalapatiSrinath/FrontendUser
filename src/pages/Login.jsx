@@ -1,1558 +1,463 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { 
-  LogIn, X, Mountain, Loader2, Shield, Sparkles, Star, Zap, Lock, User, 
-  Eye, EyeOff, ArrowRight, CheckCircle, AlertCircle, Fingerprint, KeyRound, 
-  Globe, Hexagon, Triangle, Circle, Square, Diamond, Heart, Moon, Sun,
-  Layers, Cpu, Activity, Wifi, Cloud, Database, Server, Terminal, Code,
-  Box, Compass, Target, Award, TrendingUp, BarChart2, PieChart
+import {
+  LogIn, Loader2, Eye, EyeOff, ArrowRight, User, Lock, Shield, Sparkles,
+  Zap, Star, KeyRound, CheckCircle, AlertCircle, X,
 } from "lucide-react";
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { loginUser, clearError } from "../store/slices/authSlice";
 
-// ============================================================================
-// ANIMATION VARIANTS - Comprehensive animation configurations
-// ============================================================================
+/* ─── lightweight spring presets ─── */
+const smooth = { type: "spring", stiffness: 250, damping: 28 };
 
-const pageVariants = {
-  initial: {
-    opacity: 0,
-    scale: 0.95,
-    y: 30,
-    filter: "blur(10px)",
-  },
-  animate: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.8,
-      ease: [0.25, 0.46, 0.45, 0.94],
-      staggerChildren: 0.1,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: -30,
-    filter: "blur(10px)",
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-    },
-  },
-};
-
-const headerVariants = {
-  initial: { y: -100, opacity: 0, rotateX: -45 },
-  animate: {
-    y: 0,
-    opacity: 1,
-    rotateX: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 20,
-      delay: 0.2,
-    },
-  },
-};
-
-const logoVariants = {
-  initial: { scale: 0, rotate: -180, opacity: 0 },
-  animate: {
-    scale: 1,
-    rotate: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      stiffness: 200,
-      damping: 15,
-      delay: 0.4,
-    },
-  },
-  hover: {
-    scale: 1.15,
-    rotate: 10,
-    transition: { type: "spring", stiffness: 400, damping: 10 },
-  },
-  tap: { scale: 0.9, rotate: -10 },
-};
-
-const cardVariants = {
-  initial: { opacity: 0, y: 80, scale: 0.85, rotateX: -20 },
-  animate: {
+/* ─── reusable variants ─── */
+const fade = {
+  hidden: { opacity: 0, y: 18 },
+  show: (i = 0) => ({
     opacity: 1,
     y: 0,
-    scale: 1,
-    rotateX: 0,
-    transition: {
-      type: "spring",
-      stiffness: 100,
-      damping: 20,
-      delay: 0.3,
-    },
-  },
-  hover: {
-    y: -8,
-    boxShadow: "0 30px 60px -15px rgba(0, 0, 0, 0.3)",
-    transition: { type: "spring", stiffness: 300, damping: 20 },
-  },
+    transition: { ...smooth, delay: i * 0.07 },
+  }),
+  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
 };
 
-const inputVariants = {
-  initial: { opacity: 0, x: -50, scale: 0.95 },
-  animate: {
-    opacity: 1,
-    x: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 150, damping: 20 },
-  },
-  focus: {
-    scale: 1.02,
-    transition: { type: "spring", stiffness: 300, damping: 20 },
-  },
+const scaleFade = {
+  hidden: { opacity: 0, scale: 0.92 },
+  show: { opacity: 1, scale: 1, transition: smooth },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.18 } },
 };
 
-const buttonVariants = {
-  initial: { opacity: 0, y: 30, scale: 0.9 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 200, damping: 20, delay: 0.5 },
-  },
-  hover: {
-    scale: 1.05,
-    y: -3,
-    boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.6)",
-    transition: { type: "spring", stiffness: 400, damping: 10 },
-  },
-  tap: { scale: 0.95, y: 0 },
-  loading: {
-    scale: [1, 1.02, 1],
-    transition: { duration: 1, repeat: Infinity, ease: "easeInOut" },
-  },
-};
+/* ─── Floating blobs (CSS-driven, zero JS re-renders) ─── */
+const Blobs = () => (
+  <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div className="absolute -top-32 -left-32 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-blue-400/25 to-indigo-500/20 blur-3xl animate-blob" />
+    <div className="absolute top-1/3 -right-32 h-[420px] w-[420px] rounded-full bg-gradient-to-br from-purple-400/20 to-pink-400/15 blur-3xl animate-blob animation-delay-2000" />
+    <div className="absolute -bottom-28 left-1/3 h-[380px] w-[380px] rounded-full bg-gradient-to-br from-cyan-400/20 to-teal-400/15 blur-3xl animate-blob animation-delay-4000" />
+  </div>
+);
 
-const alertVariants = {
-  initial: { opacity: 0, y: -30, scale: 0.9, height: 0 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    height: "auto",
-    transition: { type: "spring", stiffness: 200, damping: 20 },
-  },
-  exit: {
-    opacity: 0,
-    y: -30,
-    scale: 0.9,
-    height: 0,
-    transition: { duration: 0.3 },
-  },
-};
-
-const shimmerVariants = {
-  animate: {
-    x: ["-100%", "100%"],
-    transition: { duration: 2, repeat: Infinity, ease: "linear" },
-  },
-};
-
-const pulseVariants = {
-  animate: {
-    scale: [1, 1.05, 1],
-    opacity: [0.5, 1, 0.5],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-  },
-};
-
-const glowVariants = {
-  animate: {
-    boxShadow: [
-      "0 0 20px rgba(59, 130, 246, 0.3)",
-      "0 0 60px rgba(59, 130, 246, 0.6)",
-      "0 0 20px rgba(59, 130, 246, 0.3)",
-    ],
-    transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
-  },
-};
-
-const floatingVariants = {
-  animate: {
-    y: [0, -20, 0],
-    rotate: [0, 5, -5, 0],
-    transition: { duration: 6, repeat: Infinity, ease: "easeInOut" },
-  },
-};
-
-const orbitVariants = {
-  animate: {
-    rotate: 360,
-    transition: { duration: 20, repeat: Infinity, ease: "linear" },
-  },
-};
-
-const staggerContainerVariants = {
-  initial: {},
-  animate: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } },
-};
-
-const staggerItemVariants = {
-  initial: { opacity: 0, y: 30, scale: 0.9 },
-  animate: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { type: "spring", stiffness: 150, damping: 20 },
-  },
-};
-
-const morphVariants = {
-  circle: { borderRadius: "50%", rotate: 0 },
-  square: { borderRadius: "10%", rotate: 45 },
-  rounded: { borderRadius: "30%", rotate: 90 },
-};
-
-const waveVariants = {
-  animate: {
-    d: [
-      "M0,50 Q25,30 50,50 T100,50 L100,100 L0,100 Z",
-      "M0,50 Q25,70 50,50 T100,50 L100,100 L0,100 Z",
-      "M0,50 Q25,30 50,50 T100,50 L100,100 L0,100 Z",
-    ],
-    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-  },
-};
-
-// ============================================================================
-// FLOATING PARTICLES COMPONENT - Creates magical particle effects
-// ============================================================================
-
-const FloatingParticles = () => {
-  const particles = useMemo(() => {
-    return Array.from({ length: 60 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 8 + 2,
-      duration: Math.random() * 15 + 10,
-      delay: Math.random() * 8,
-      opacity: Math.random() * 0.6 + 0.1,
-      color: [
-        "rgba(59, 130, 246, 0.4)",
-        "rgba(99, 102, 241, 0.4)",
-        "rgba(139, 92, 246, 0.4)",
-        "rgba(168, 85, 247, 0.4)",
-        "rgba(6, 182, 212, 0.4)",
-      ][Math.floor(Math.random() * 5)],
-    }));
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute rounded-full"
-          style={{
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
-            width: particle.size,
-            height: particle.size,
-            background: particle.color,
-            boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
-          }}
-          animate={{
-            y: [0, -150, 0],
-            x: [0, Math.random() * 80 - 40, 0],
-            opacity: [particle.opacity, particle.opacity * 2, particle.opacity],
-            scale: [1, 1.8, 1],
-            rotate: [0, 360, 0],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            delay: particle.delay,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ============================================================================
-// ANIMATED BACKGROUND GRADIENT - Mouse-following gradients
-// ============================================================================
-
-const AnimatedBackground = () => {
-  const mouseX = useMotionValue(50);
-  const mouseY = useMotionValue(50);
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
-      mouseX.set((clientX / innerWidth) * 100);
-      mouseY.set((clientY / innerHeight) * 100);
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
-
-  const backgroundGradient = useMotionTemplate`
-    radial-gradient(
-      800px circle at ${springX}% ${springY}%,
-      rgba(59, 130, 246, 0.2),
-      rgba(99, 102, 241, 0.1) 40%,
-      transparent 60%
-    )
-  `;
-
-  return (
-    <>
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{ background: backgroundGradient }}
-      />
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-blue-50/50 to-slate-100 -z-10" />
-
-      {/* Animated gradient orbs */}
-      <motion.div
-        className="fixed top-[-200px] left-[-200px] w-[600px] h-[600px] rounded-full bg-gradient-to-r from-blue-400/25 to-cyan-400/25 blur-3xl"
-        animate={{
-          x: [0, 150, 0],
-          y: [0, 100, 0],
-          scale: [1, 1.3, 1],
-          rotate: [0, 180, 360],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="fixed bottom-[-200px] right-[-200px] w-[500px] h-[500px] rounded-full bg-gradient-to-r from-purple-400/25 to-pink-400/25 blur-3xl"
-        animate={{
-          x: [0, -120, 0],
-          y: [0, -80, 0],
-          scale: [1, 1.4, 1],
-          rotate: [0, -180, -360],
-        }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-r from-indigo-400/15 to-violet-400/15 blur-3xl"
-        animate={{
-          rotate: [0, 360],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      />
-      <motion.div
-        className="fixed top-[20%] right-[20%] w-[400px] h-[400px] rounded-full bg-gradient-to-r from-emerald-400/20 to-teal-400/20 blur-3xl"
-        animate={{
-          x: [0, 80, 0],
-          y: [0, 60, 0],
-          scale: [1, 1.2, 1],
-        }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-      />
-    </>
-  );
-};
-
-// ============================================================================
-// GEOMETRIC SHAPES DECORATION - Floating geometric elements
-// ============================================================================
-
-const GeometricShapes = () => {
-  const shapes = useMemo(
-    () => [
-      { Icon: Hexagon, x: "8%", y: "15%", size: 45, rotate: 0, duration: 18, color: "text-blue-300/25" },
-      { Icon: Triangle, x: "88%", y: "12%", size: 38, rotate: 45, duration: 22, color: "text-indigo-300/25" },
-      { Icon: Circle, x: "4%", y: "65%", size: 32, rotate: 0, duration: 15, color: "text-purple-300/25" },
-      { Icon: Square, x: "92%", y: "55%", size: 28, rotate: 30, duration: 25, color: "text-cyan-300/25" },
-      { Icon: Star, x: "12%", y: "82%", size: 30, rotate: 15, duration: 17, color: "text-pink-300/25" },
-      { Icon: Diamond, x: "82%", y: "78%", size: 35, rotate: 60, duration: 20, color: "text-emerald-300/25" },
-      { Icon: Sparkles, x: "45%", y: "8%", size: 26, rotate: 0, duration: 12, color: "text-yellow-300/30" },
-      { Icon: Zap, x: "72%", y: "25%", size: 28, rotate: -15, duration: 16, color: "text-orange-300/25" },
-      { Icon: Heart, x: "25%", y: "92%", size: 24, rotate: 10, duration: 14, color: "text-rose-300/25" },
-      { Icon: Moon, x: "65%", y: "88%", size: 26, rotate: -20, duration: 19, color: "text-violet-300/25" },
-      { Icon: Layers, x: "35%", y: "18%", size: 22, rotate: 25, duration: 21, color: "text-teal-300/25" },
-      { Icon: Cpu, x: "78%", y: "42%", size: 24, rotate: 0, duration: 23, color: "text-slate-300/25" },
-    ],
-    []
-  );
-
-  return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-      {shapes.map((shape, index) => {
-        const IconComponent = shape.Icon;
-        return (
-          <motion.div
-            key={index}
-            className={`absolute ${shape.color}`}
-            style={{ left: shape.x, top: shape.y }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 15, -15, 0],
-              rotate: [shape.rotate, shape.rotate + 360],
-              opacity: [0.25, 0.5, 0.25],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: shape.duration,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <IconComponent size={shape.size} strokeWidth={1} />
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-};
-
-// ============================================================================
-// ORBITING ICONS COMPONENT - Icons orbiting around a center
-// ============================================================================
-
-const OrbitingIcons = ({ size = 120 }) => {
-  const icons = [Server, Database, Cloud, Wifi, Activity, Terminal];
-
-  return (
-    <motion.div
-      className="absolute inset-0 pointer-events-none"
-      variants={orbitVariants}
-      animate="animate"
-    >
-      {icons.map((Icon, index) => {
-        const angle = (index * 360) / icons.length;
-        const radius = size / 2 + 20;
-        return (
-          <motion.div
-            key={index}
-            className="absolute text-blue-400/40"
-            style={{
-              left: `calc(50% + ${Math.cos((angle * Math.PI) / 180) * radius}px)`,
-              top: `calc(50% + ${Math.sin((angle * Math.PI) / 180) * radius}px)`,
-              transform: "translate(-50%, -50%)",
-            }}
-            animate={{ rotate: -360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          >
-            <Icon size={16} />
-          </motion.div>
-        );
-      })}
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// ANIMATED LOGO COMPONENT - Interactive logo with effects
-// ============================================================================
-
-const AnimatedLogo = () => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [clicks, setClicks] = useState(0);
-
-  const handleClick = () => {
-    setClicks((c) => c + 1);
-  };
-
-  return (
-    <motion.div
-      className="relative"
-      variants={logoVariants}
-      initial="initial"
-      animate="animate"
-      whileHover="hover"
-      whileTap="tap"
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      onClick={handleClick}
-    >
-      <motion.div
-        className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md relative overflow-hidden cursor-pointer border border-white/30"
-        animate={isHovered ? glowVariants.animate : {}}
-      >
-        <motion.div
-          animate={{ rotate: clicks * 360 }}
-          transition={{ type: "spring", stiffness: 200, damping: 10 }}
-        >
-          <Mountain className="w-7 h-7 text-white relative z-10" />
-        </motion.div>
-
-        {/* Shimmer effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-          variants={shimmerVariants}
-          animate="animate"
-        />
-
-        {/* Pulse rings */}
-        {isHovered && (
-          <>
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute inset-0 rounded-xl border-2 border-white/30"
-                initial={{ scale: 1, opacity: 0.5 }}
-                animate={{ scale: 1.5 + i * 0.3, opacity: 0 }}
-                transition={{ duration: 1, delay: i * 0.2, repeat: Infinity }}
-              />
-            ))}
-          </>
-        )}
-      </motion.div>
-
-      {/* Orbiting particles */}
-      <AnimatePresence>
-        {isHovered && (
-          <>
-            {[...Array(6)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2 h-2 rounded-full"
-                style={{
-                  top: "50%",
-                  left: "50%",
-                  background: `hsl(${220 + i * 20}, 80%, 60%)`,
-                  boxShadow: `0 0 10px hsl(${220 + i * 20}, 80%, 60%)`,
-                }}
-                initial={{ scale: 0, x: "-50%", y: "-50%" }}
-                animate={{
-                  scale: 1,
-                  x: `${Math.cos((i * Math.PI * 2) / 6) * 35 - 50}%`,
-                  y: `${Math.sin((i * Math.PI * 2) / 6) * 35 - 50}%`,
-                  rotate: 360,
-                }}
-                exit={{ scale: 0, x: "-50%", y: "-50%" }}
-                transition={{
-                  duration: 0.6,
-                  delay: i * 0.05,
-                  rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                }}
-              />
-            ))}
-          </>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// ANIMATED INPUT COMPONENT - Feature-rich input field
-// ============================================================================
-
-const AnimatedInput = ({
-  label,
-  type = "text",
-  name,
-  value,
-  onChange,
-  placeholder,
-  icon: Icon,
-  autoComplete,
-  delay = 0,
-  showPasswordToggle = false,
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [hasValue, setHasValue] = useState(false);
-
-  useEffect(() => {
-    setHasValue(value && value.length > 0);
-  }, [value]);
-
-  const actualType = showPasswordToggle ? (showPassword ? "text" : "password") : type;
-
-  return (
-    <motion.div
-      className="mb-6 relative"
-      variants={inputVariants}
-      initial="initial"
-      animate="animate"
-      transition={{ delay }}
-    >
-      <motion.label
-        className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2"
-        animate={{
-          color: isFocused ? "#3b82f6" : "#334155",
-          x: isFocused ? 5 : 0,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        {Icon && (
-          <motion.span
-            animate={{
-              scale: isFocused ? 1.2 : 1,
-              rotate: isFocused ? 10 : 0,
-              color: isFocused ? "#3b82f6" : "#64748b",
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 10 }}
-          >
-            <Icon className="w-4 h-4" />
-          </motion.span>
-        )}
-        <span>{label}</span>
-        {hasValue && (
-          <motion.span
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="text-emerald-500"
-          >
-            <CheckCircle className="w-3 h-3" />
-          </motion.span>
-        )}
-      </motion.label>
-
-      <div className="relative">
-        {/* Animated border gradient */}
-        <motion.div
-          className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 opacity-0 -z-10"
-          animate={{
-            opacity: isFocused ? 0.7 : 0,
-            scale: isFocused ? 1 : 0.95,
-          }}
-          style={{ filter: "blur(4px)" }}
-          transition={{ duration: 0.3 }}
-        />
-
-        {/* Focus glow effect */}
-        <motion.div
-          className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0"
-          animate={{
-            opacity: isFocused ? 0.1 : 0,
-            scale: isFocused ? 1.02 : 1,
-          }}
-          transition={{ duration: 0.2 }}
-        />
-
-        <motion.input
-          type={actualType}
-          name={name}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          className="w-full px-4 py-3.5 rounded-xl border-2 bg-white/90 backdrop-blur-sm text-slate-800 text-sm focus:outline-none transition-all placeholder-slate-400 relative z-10"
-          animate={{
-            borderColor: isFocused ? "#3b82f6" : hasValue ? "#10b981" : "#e2e8f0",
-            boxShadow: isFocused
-              ? "0 0 0 4px rgba(59, 130, 246, 0.15), 0 10px 30px -5px rgba(59, 130, 246, 0.25)"
-              : hasValue
-              ? "0 0 0 4px rgba(16, 185, 129, 0.1), 0 4px 15px -3px rgba(16, 185, 129, 0.1)"
-              : "0 2px 8px rgba(0, 0, 0, 0.05)",
-          }}
-          whileHover={{ borderColor: isFocused ? "#3b82f6" : "#93c5fd" }}
-          transition={{ duration: 0.2 }}
-        />
-
-        {showPasswordToggle && (
-          <motion.button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 z-20 p-1.5 rounded-lg hover:bg-slate-100"
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.85 }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={showPassword ? "visible" : "hidden"}
-                initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
-                animate={{ opacity: 1, rotate: 0, scale: 1 }}
-                exit={{ opacity: 0, rotate: 180, scale: 0.5 }}
-                transition={{ duration: 0.3 }}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </motion.div>
-            </AnimatePresence>
-          </motion.button>
-        )}
-      </div>
-
-      {/* Animated focus indicator */}
-      <AnimatePresence>
-        {isFocused && (
-          <motion.div
-            className="flex gap-1 mt-2"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-          >
-            {[...Array(4)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="h-1 rounded-full bg-gradient-to-r from-blue-400 to-indigo-400"
-                initial={{ width: 0 }}
-                animate={{ width: 20 }}
-                transition={{ duration: 0.3, delay: i * 0.1 }}
-              />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Character count indicator for password */}
-      {showPasswordToggle && hasValue && (
-        <motion.div
-          className="absolute -right-2 top-9 flex flex-col gap-0.5"
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          {[...Array(Math.min(value.length, 8))].map((_, i) => (
-            <motion.div
-              key={i}
-              className="w-1 h-1 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500"
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: i * 0.03 }}
-            />
-          ))}
-        </motion.div>
-      )}
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// ANIMATED CHECKBOX COMPONENT
-// ============================================================================
-
-const AnimatedCheckbox = ({ checked, onChange, label }) => {
-  return (
-    <motion.label
-      className="flex items-center gap-3 cursor-pointer select-none group"
-      whileHover={{ x: 3 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <motion.div className="relative w-6 h-6" whileTap={{ scale: 0.85 }}>
-        <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
-        <motion.div
-          className="w-6 h-6 rounded-lg border-2 flex items-center justify-center overflow-hidden"
-          animate={{
-            borderColor: checked ? "#3b82f6" : "#cbd5e1",
-            backgroundColor: checked ? "#3b82f6" : "transparent",
-            scale: checked ? [1, 1.1, 1] : 1,
-          }}
-          transition={{ duration: 0.2 }}
-        >
-          <AnimatePresence>
-            {checked && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0, rotate: -180 }}
-                animate={{ scale: 1, opacity: 1, rotate: 0 }}
-                exit={{ scale: 0, opacity: 0, rotate: 180 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-              >
-                <CheckCircle className="w-4 h-4 text-white" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Ripple effect */}
-        <AnimatePresence>
-          {checked && (
-            <>
-              {[...Array(2)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute inset-0 rounded-lg border-2 border-blue-500"
-                  initial={{ scale: 1, opacity: 0.6 }}
-                  animate={{ scale: 2 + i * 0.5, opacity: 0 }}
-                  exit={{ scale: 1, opacity: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                />
-              ))}
-            </>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      <motion.span
-        className="text-sm font-medium"
-        animate={{
-          color: checked ? "#3b82f6" : "#475569",
-          fontWeight: checked ? 600 : 500,
-        }}
-      >
-        {label}
-      </motion.span>
-    </motion.label>
-  );
-};
-
-// ============================================================================
-// ANIMATED BUTTON COMPONENT - Feature-rich submit button
-// ============================================================================
-
-const AnimatedButton = ({ onClick, disabled, isLoading, children, type = "submit" }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [particles, setParticles] = useState([]);
-
-  const handleClick = (e) => {
-    if (!disabled && onClick) {
-      // Create explosion particles
-      const newParticles = Array.from({ length: 20 }, (_, i) => ({
-        id: Date.now() + i,
-        angle: (i * 360) / 20,
-      }));
-      setParticles(newParticles);
-      setTimeout(() => setParticles([]), 1000);
-      onClick(e);
-    }
-  };
-
-  return (
-    <motion.button
-      type={type}
-      onClick={handleClick}
-      disabled={disabled}
-      className="w-full relative overflow-hidden rounded-xl text-white text-sm font-bold px-6 py-4 cursor-pointer disabled:cursor-not-allowed"
-      variants={buttonVariants}
-      initial="initial"
-      animate={isLoading ? "loading" : "animate"}
-      whileHover={!disabled ? "hover" : undefined}
-      whileTap={!disabled ? "tap" : undefined}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-    >
-      {/* Animated background gradient */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"
-        animate={{
-          backgroundPosition: isHovered ? ["0% 50%", "100% 50%", "0% 50%"] : "0% 50%",
-        }}
-        style={{ backgroundSize: "200% 200%" }}
-        transition={{ duration: 3, repeat: isHovered ? Infinity : 0 }}
-      />
-
-      {/* Shimmer effect */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-        initial={{ x: "-100%" }}
-        animate={{ x: isHovered ? "100%" : "-100%" }}
-        transition={{ duration: 0.8 }}
-      />
-
-      {/* Ripple effect */}
-      <AnimatePresence>
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute w-2 h-2 bg-white rounded-full"
-            style={{
-              left: "50%",
-              top: "50%",
-            }}
-            initial={{ scale: 0, x: "-50%", y: "-50%", opacity: 1 }}
-            animate={{
-              scale: 1.5,
-              x: `${Math.cos((particle.angle * Math.PI) / 180) * 100 - 50}%`,
-              y: `${Math.sin((particle.angle * Math.PI) / 180) * 100 - 50}%`,
-              opacity: 0,
-            }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
-        ))}
-      </AnimatePresence>
-
-      {/* Button content */}
-      <motion.div
-        className="relative z-10 flex items-center justify-center gap-3"
-        animate={{
-          x: isLoading ? [0, 3, -3, 0] : 0,
-        }}
-        transition={{ duration: 0.5, repeat: isLoading ? Infinity : 0 }}
-      >
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0, rotate: -180, scale: 0 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 180, scale: 0 }}
-              className="flex items-center gap-2"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-              >
-                <Loader2 className="w-5 h-5" />
-              </motion.div>
-              <span>Signing in...</span>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="idle"
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              className="flex items-center gap-2"
-            >
-              <LogIn className="w-5 h-5" />
-              <span>Sign In</span>
-              <motion.div
-                animate={{ x: isHovered ? 8 : 0, scale: isHovered ? 1.2 : 1 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <ArrowRight className="w-4 h-4" />
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-
-      {/* Hover particle effects */}
-      <AnimatePresence>
-        {isHovered && !disabled && (
-          <>
-            {[...Array(12)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-white rounded-full"
-                initial={{ x: "50%", y: "100%", opacity: 0.8 }}
-                animate={{
-                  y: ["100%", "-50%"],
-                  x: `${50 + (Math.random() * 80 - 40)}%`,
-                  opacity: [0.8, 0],
-                  scale: [1, 0],
-                }}
-                transition={{
-                  duration: 1,
-                  delay: i * 0.08,
-                  repeat: Infinity,
-                  ease: "easeOut",
-                }}
-              />
-            ))}
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Disabled overlay */}
-      {disabled && !isLoading && (
-        <motion.div
-          className="absolute inset-0 bg-slate-500/60 backdrop-blur-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        />
-      )}
-    </motion.button>
-  );
-};
-
-// ============================================================================
-// WELCOME BANNER COMPONENT
-// ============================================================================
-
-const WelcomeBanner = ({ onClose }) => {
-  const [iconIndex, setIconIndex] = useState(0);
-  const icons = [Shield, Sparkles, Star, Zap, Award];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIconIndex((i) => (i + 1) % icons.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const CurrentIcon = icons[iconIndex];
-
-  return (
-    <motion.div
-      className="relative overflow-hidden bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200/60 rounded-2xl px-5 py-4 mb-6"
-      variants={alertVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      layout
-    >
-      {/* Animated background pattern */}
-      <motion.div
-        className="absolute inset-0 opacity-30"
+/* ─── Tiny sparkle dots (pure CSS) ─── */
+const Dots = () => (
+  <div className="pointer-events-none fixed inset-0 -z-10">
+    {[...Array(6)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute h-1.5 w-1.5 rounded-full bg-white/40 animate-pulse-slow"
         style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, #3b82f6 1px, transparent 0)`,
-          backgroundSize: "24px 24px",
+          top: `${15 + i * 14}%`,
+          left: `${10 + ((i * 17) % 80)}%`,
+          animationDelay: `${i * 0.7}s`,
         }}
-        animate={{ backgroundPosition: ["0px 0px", "24px 24px"] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
       />
+    ))}
+  </div>
+);
 
-      <div className="relative flex items-center justify-between">
-        <motion.div
-          className="flex items-center gap-3"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <motion.div
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-blue-500/30 relative overflow-hidden"
-            animate={{ rotate: [0, 5, -5, 0], scale: [1, 1.05, 1] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={iconIndex}
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                exit={{ scale: 0, rotate: 180 }}
-                transition={{ duration: 0.3 }}
-              >
-                <CurrentIcon className="w-6 h-6 text-white" />
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+/* ─── Animated Logo ─── */
+const Logo = () => (
+  <motion.div
+    className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30"
+    initial={{ scale: 0, rotate: -180 }}
+    animate={{ scale: 1, rotate: 0 }}
+    transition={{ ...smooth, delay: 0.1 }}
+    whileHover={{ scale: 1.08, rotate: 5, transition: { duration: 0.25 } }}
+  >
+    <Shield className="h-8 w-8 text-white" />
+  </motion.div>
+);
 
-          <div>
-            <motion.span
-              className="text-blue-800 font-bold text-base block"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              Welcome, Stranger!
-            </motion.span>
-            <motion.span
-              className="text-blue-600/70 text-xs"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              Sign in to access your dashboard
-            </motion.span>
-          </div>
-        </motion.div>
+/* ─── Input Component ─── */
+const Input = ({ icon: Icon, label, error, delay = 0, ...props }) => {
+  const [focused, setFocused] = useState(false);
 
-        <motion.button
-          onClick={onClose}
-          className="w-8 h-8 rounded-lg bg-white/50 backdrop-blur-sm flex items-center justify-center text-blue-500 hover:text-blue-700 hover:bg-white transition-all cursor-pointer"
-          whileHover={{ scale: 1.15, rotate: 90 }}
-          whileTap={{ scale: 0.85 }}
-        >
-          <X className="w-4 h-4" />
-        </motion.button>
+  return (
+    <motion.div
+      custom={delay}
+      variants={fade}
+      initial="hidden"
+      animate="show"
+      className="space-y-1.5"
+    >
+      <label className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5" />
+        {label}
+      </label>
+      <div
+        className={`relative rounded-xl border-2 transition-all duration-200 ${
+          error
+            ? "border-red-400 bg-red-50/50"
+            : focused
+            ? "border-blue-400 bg-blue-50/30 shadow-sm shadow-blue-200/40"
+            : "border-gray-200 bg-white hover:border-gray-300"
+        }`}
+      >
+        <input
+          className="w-full rounded-xl bg-transparent px-4 py-3 text-gray-800 outline-none placeholder:text-gray-400"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          {...props}
+        />
       </div>
-
-      {/* Floating sparkles */}
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-blue-400/40"
-          style={{ left: `${10 + i * 10}%`, top: `${20 + (i % 3) * 20}%` }}
-          animate={{
-            y: [0, -15, 0],
-            opacity: [0.3, 0.7, 0.3],
-            rotate: [0, 180, 360],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 2 + i * 0.3,
-            repeat: Infinity,
-            delay: i * 0.15,
-          }}
-        >
-          <Sparkles className="w-3 h-3" />
-        </motion.div>
-      ))}
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// ERROR ALERT COMPONENT
-// ============================================================================
-
-const ErrorAlert = ({ error }) => {
-  return (
-    <motion.div
-      className="relative overflow-hidden bg-gradient-to-r from-red-50 to-rose-50 border border-red-200/60 rounded-2xl px-5 py-4 mb-6"
-      variants={alertVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      <motion.div
-        className="flex items-center gap-3"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-      >
-        <motion.div
-          className="w-11 h-11 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg shadow-red-500/30"
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-          transition={{ duration: 0.6, repeat: 3 }}
-        >
-          <AlertCircle className="w-5 h-5 text-white" />
-        </motion.div>
-
-        <span className="text-red-700 font-semibold text-sm flex-1">{error}</span>
-      </motion.div>
-
-      {/* Animated warning indicator */}
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-rose-500 to-red-500"
-        animate={{ backgroundPosition: ["0% 0%", "100% 0%"] }}
-        style={{ backgroundSize: "200% 100%" }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* Shake effect on mount */}
-      <motion.div
-        className="absolute inset-0 border-2 border-red-300 rounded-2xl"
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: [0.5, 0, 0.5, 0] }}
-        transition={{ duration: 0.5 }}
-      />
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// FEATURES LIST COMPONENT
-// ============================================================================
-
-const FeaturesList = () => {
-  const features = [
-    { icon: Shield, text: "Secure", color: "from-blue-500 to-indigo-500" },
-    { icon: Fingerprint, text: "Biometric", color: "from-indigo-500 to-purple-500" },
-    { icon: KeyRound, text: "Encrypted", color: "from-purple-500 to-pink-500" },
-    { icon: Globe, text: "Global", color: "from-cyan-500 to-blue-500" },
-  ];
-
-  return (
-    <motion.div
-      className="flex justify-center gap-5 mt-8"
-      variants={staggerContainerVariants}
-      initial="initial"
-      animate="animate"
-    >
-      {features.map((feature, index) => {
-        const IconComponent = feature.icon;
-        return (
-          <motion.div
-            key={index}
-            className="flex flex-col items-center gap-2"
-            variants={staggerItemVariants}
-          >
-            <motion.div
-              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center shadow-lg`}
-              whileHover={{
-                scale: 1.2,
-                rotate: 10,
-                boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.25)",
-              }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <IconComponent className="w-5 h-5 text-white" />
-            </motion.div>
-            <motion.span
-              className="text-xs text-slate-500 font-medium"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 + index * 0.1 }}
-            >
-              {feature.text}
-            </motion.span>
-          </motion.div>
-        );
-      })}
-    </motion.div>
-  );
-};
-
-// ============================================================================
-// ANIMATED LINK COMPONENT
-// ============================================================================
-
-const AnimatedLink = ({ to, children }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <Link
-      to={to}
-      className="relative inline-block text-sm text-blue-600 font-bold"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <motion.span
-        className="relative z-10"
-        animate={{
-          color: isHovered ? "#1d4ed8" : "#2563eb",
-          scale: isHovered ? 1.05 : 1,
-        }}
-      >
-        {children}
-      </motion.span>
-
-      {/* Animated underline */}
-      <motion.div
-        className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"
-        initial={{ width: 0 }}
-        animate={{ width: isHovered ? "100%" : 0 }}
-        transition={{ duration: 0.3 }}
-      />
-
-      {/* Glow effect */}
-      <motion.div
-        className="absolute inset-0 bg-blue-500/10 rounded-lg -z-10"
-        initial={{ opacity: 0, scale: 0.8, y: 5 }}
-        animate={{
-          opacity: isHovered ? 1 : 0,
-          scale: isHovered ? 1.2 : 0.8,
-          y: isHovered ? 0 : 5,
-        }}
-        transition={{ duration: 0.2 }}
-      />
-
-      {/* Sparkle effect on hover */}
       <AnimatePresence>
-        {isHovered && (
-          <motion.div
-            className="absolute -top-2 -right-2"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            exit={{ scale: 0, rotate: 180 }}
+        {error && (
+          <motion.p
+            className="text-xs text-red-500 flex items-center gap-1"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
           >
-            <Sparkles className="w-3 h-3 text-blue-400" />
-          </motion.div>
+            <AlertCircle className="h-3 w-3" /> {error}
+          </motion.p>
         )}
       </AnimatePresence>
-    </Link>
+    </motion.div>
   );
 };
 
-// ============================================================================
-// FOOTER COMPONENT
-// ============================================================================
-
-const AnimatedFooter = () => {
-  const currentYear = new Date().getFullYear();
+/* ─── Password Input ─── */
+const PasswordInput = ({ label, error, delay = 0, ...props }) => {
+  const [show, setShow] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   return (
-    <motion.footer
-      className="text-center py-8 relative"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 1.2, duration: 0.6 }}
+    <motion.div
+      custom={delay}
+      variants={fade}
+      initial="hidden"
+      animate="show"
+      className="space-y-1.5"
     >
-      <motion.div
-        className="flex items-center justify-center gap-2 text-slate-400"
-        whileHover={{ scale: 1.02 }}
+      <label className="text-sm font-medium text-gray-600 flex items-center gap-1.5">
+        <Lock className="h-3.5 w-3.5" />
+        {label}
+      </label>
+      <div
+        className={`relative rounded-xl border-2 transition-all duration-200 ${
+          error
+            ? "border-red-400 bg-red-50/50"
+            : focused
+            ? "border-blue-400 bg-blue-50/30 shadow-sm shadow-blue-200/40"
+            : "border-gray-200 bg-white hover:border-gray-300"
+        }`}
       >
-        <motion.span
-          animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        <input
+          type={show ? "text" : "password"}
+          className="w-full rounded-xl bg-transparent px-4 py-3 pr-12 text-gray-800 outline-none placeholder:text-gray-400"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
         >
-          ©
-        </motion.span>
-        <span className="text-sm">{currentYear}</span>
-        <motion.span
-          className="font-bold bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 text-transparent bg-clip-text"
-          animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-          style={{ backgroundSize: "200% 200%" }}
-          transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-        >
-          ELEVEN-PANEL
-        </motion.span>
-      </motion.div>
-
-      {/* Animated border */}
-      <motion.div
-        className="absolute top-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"
-        animate={{
-          opacity: [0.3, 0.7, 0.3],
-          scaleX: [0.5, 1, 0.5],
-        }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Decorative dots */}
-      <motion.div className="flex justify-center gap-2 mt-3">
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="w-1 h-1 rounded-full bg-slate-300"
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.7, 0.3],
-            }}
-            transition={{
-              duration: 1.5,
-              delay: i * 0.2,
-              repeat: Infinity,
-            }}
-          />
-        ))}
-      </motion.div>
-    </motion.footer>
+          {show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+        </button>
+      </div>
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            className="text-xs text-red-500 flex items-center gap-1"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+          >
+            <AlertCircle className="h-3 w-3" /> {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
-// ============================================================================
-// MAIN LOGIN COMPONENT
-// ============================================================================
+/* ─── Feature pills ─── */
+const features = [
+  { icon: Zap, text: "Instant Access", color: "text-yellow-500" },
+  { icon: Shield, text: "Secure Login", color: "text-blue-500" },
+  { icon: Star, text: "Premium Keys", color: "text-purple-500" },
+];
 
-const Login = () => {
+const FeaturePills = () => (
+  <motion.div
+    className="flex flex-wrap justify-center gap-2 mb-2"
+    variants={fade}
+    custom={1}
+    initial="hidden"
+    animate="show"
+  >
+    {features.map((f, i) => (
+      <motion.div
+        key={i}
+        className="flex items-center gap-1.5 rounded-full bg-white/70 backdrop-blur-sm px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm border border-gray-100"
+        whileHover={{ scale: 1.05, y: -2 }}
+        transition={{ duration: 0.2 }}
+      >
+        <f.icon className={`h-3.5 w-3.5 ${f.color}`} />
+        {f.text}
+      </motion.div>
+    ))}
+  </motion.div>
+);
+
+/* ═══════════════════════════════════════════════════════════════════
+   LOGIN PAGE
+   ═══════════════════════════════════════════════════════════════════ */
+export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useSelector((s) => s.auth);
 
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-  const [stayLoggedIn, setStayLoggedIn] = useState(false);
+  const [formData, setFormData] = useState({ username: "", password: "" });
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
 
   useEffect(() => {
-    dispatch(clearError());
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [dispatch, isAuthenticated, navigate]);
+    if (isAuthenticated) navigate("/dashboard", { replace: true });
+  }, [isAuthenticated, navigate]);
 
-  const handleChange = useCallback((e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+  useEffect(() => {
+    return () => dispatch(clearError());
+  }, [dispatch]);
+
+  /* live validation */
+  useEffect(() => {
+    const e = {};
+    if (touched.username && !formData.username.trim())
+      e.username = "Username is required";
+    if (touched.password && !formData.password)
+      e.password = "Password is required";
+    setErrors(e);
+  }, [formData, touched]);
+
+  const onChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setFormData((p) => ({ ...p, [name]: value }));
+    setTouched((p) => ({ ...p, [name]: true }));
   }, []);
 
-  const handleLogin = useCallback(
+  const handleSubmit = useCallback(
     (e) => {
       e.preventDefault();
-      if (!formData.username || !formData.password) return;
+      setTouched({ username: true, password: true });
+      if (!formData.username.trim() || !formData.password) return;
       dispatch(loginUser(formData));
     },
-    [dispatch, formData]
+    [dispatch, formData],
   );
 
+  const isValid = formData.username.trim() && formData.password;
+
   return (
-    <motion.div
-      className="min-h-screen flex flex-col relative overflow-hidden"
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-    >
-      {/* Animated background elements */}
-      <AnimatedBackground />
-      <FloatingParticles />
-      <GeometricShapes />
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/30 relative">
+      <Blobs />
+      <Dots />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <motion.header
-        className="relative z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 w-full py-4 px-6 flex items-center gap-4 shadow-2xl shadow-blue-500/30"
-        variants={headerVariants}
-        initial="initial"
-        animate="animate"
+        className="relative z-30 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4 px-6 flex items-center gap-3 shadow-lg shadow-blue-500/20"
+        initial={{ y: -60, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={smooth}
       >
-        {/* Animated header background */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-transparent to-purple-400/20"
-          animate={{ backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"] }}
-          style={{ backgroundSize: "200% 100%" }}
-          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-        />
-
-        <AnimatedLogo />
-
-        <motion.span
-          className="text-white text-xl font-bold tracking-wide relative"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+          className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 backdrop-blur-sm"
+          whileHover={{ rotate: 15, scale: 1.1 }}
+          transition={{ duration: 0.25 }}
         >
+          <KeyRound className="h-5 w-5 text-white" />
+        </motion.div>
+        <span className="text-white text-lg font-bold tracking-wide">
           ELEVEN-PANEL
-          <motion.div
-            className="absolute -bottom-1 left-0 h-0.5 bg-white/60"
-            initial={{ width: 0 }}
-            animate={{ width: "100%" }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-          />
-        </motion.span>
-
-        {/* Header decorations */}
+        </span>
         <motion.div
-          className="ml-auto flex gap-3"
+          className="ml-auto flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs text-white/90"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.5 }}
         >
-          {[Sparkles, Star, Zap].map((Icon, i) => (
-            <motion.div
-              key={i}
-              className="text-white/50"
-              animate={{
-                y: [0, -6, 0],
-                opacity: [0.4, 0.9, 0.4],
-                rotate: [0, 10, -10, 0],
-              }}
-              transition={{ duration: 2, delay: i * 0.25, repeat: Infinity }}
-            >
-              <Icon className="w-4 h-4" />
-            </motion.div>
-          ))}
+          <Sparkles className="h-3 w-3" /> User Portal
         </motion.div>
       </motion.header>
 
-      {/* Main content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-12 relative z-10">
+      {/* ── Main ── */}
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
         <motion.div
           className="w-full max-w-md"
-          variants={staggerContainerVariants}
-          initial="initial"
-          animate="animate"
+          variants={scaleFade}
+          initial="hidden"
+          animate="show"
         >
-          {/* Welcome Banner */}
-          <AnimatePresence>
-            {showWelcome && <WelcomeBanner onClose={() => setShowWelcome(false)} />}
-          </AnimatePresence>
-
-          {/* Login Card */}
+          {/* Card */}
           <motion.div
-            className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-200/60 p-8 overflow-hidden"
-            variants={cardVariants}
-            whileHover="hover"
+            className="rounded-3xl bg-white/80 backdrop-blur-xl border border-white/60 shadow-xl shadow-gray-200/40 p-8 space-y-6"
+            whileHover={{
+              boxShadow: "0 25px 60px -12px rgba(59,130,246,0.15)",
+            }}
+            transition={{ duration: 0.3 }}
           >
-            {/* Card glow effect */}
+            <Logo />
+
             <motion.div
-              className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-3xl opacity-0 blur-xl"
-              animate={{ opacity: [0, 0.15, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
+              className="text-center space-y-1"
+              variants={fade}
+              custom={0.5}
+              initial="hidden"
+              animate="show"
+            >
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                Welcome Back
+              </h1>
+              <p className="text-sm text-gray-500">Sign in to your account</p>
+            </motion.div>
 
-            {/* Card content */}
-            <div className="relative">
-              {/* Title section */}
-              <motion.div className="text-center mb-8" variants={staggerItemVariants}>
+            <FeaturePills />
+
+            {/* Error banner */}
+            <AnimatePresence>
+              {error && (
                 <motion.div
-                  className="w-18 h-18 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-blue-500/30 relative"
-                  style={{ width: 72, height: 72 }}
-                  animate={{
-                    rotate: [0, 5, -5, 0],
-                    scale: [1, 1.05, 1],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                  className="flex items-center gap-3 rounded-xl bg-red-50 border border-red-200 p-3"
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: "auto", marginTop: 8 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  transition={{ duration: 0.25 }}
                 >
-                  <Fingerprint className="w-9 h-9 text-white" />
-                  <OrbitingIcons size={72} />
+                  <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
+                  <span className="text-sm text-red-600 flex-1">{error}</span>
+                  <button onClick={() => dispatch(clearError())}>
+                    <X className="h-4 w-4 text-red-400 hover:text-red-600" />
+                  </button>
                 </motion.div>
+              )}
+            </AnimatePresence>
 
-                <motion.h2
-                  className="text-3xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 text-transparent bg-clip-text"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                >
-                  Welcome Back
-                </motion.h2>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Input
+                icon={User}
+                label="Username"
+                name="username"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={onChange}
+                error={errors.username}
+                delay={2}
+                autoComplete="username"
+              />
 
-                <motion.p
-                  className="text-slate-500 mt-2 text-sm"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.45 }}
-                >
-                  Sign in to access your account
-                </motion.p>
-              </motion.div>
+              <PasswordInput
+                label="Password"
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={onChange}
+                error={errors.password}
+                delay={3}
+                autoComplete="current-password"
+              />
 
-              {/* Error Alert */}
-              <AnimatePresence>{error && <ErrorAlert error={error} />}</AnimatePresence>
+              {/* Submit */}
+              <motion.button
+                type="submit"
+                disabled={isLoading || !isValid}
+                className={`w-full relative overflow-hidden rounded-xl py-3.5 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
+                  isValid
+                    ? "bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+                custom={4}
+                variants={fade}
+                initial="hidden"
+                animate="show"
+                whileHover={isValid ? { scale: 1.02, y: -1 } : {}}
+                whileTap={isValid ? { scale: 0.98 } : {}}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <>
+                    <LogIn className="h-4 w-4" />
+                    Sign In
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
 
-              {/* Login Form */}
-              <motion.form onSubmit={handleLogin} variants={staggerContainerVariants}>
-                <AnimatedInput
-                  label="Username"
-                  type="text"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Enter your username"
-                  icon={User}
-                  autoComplete="username"
-                  delay={0.1}
-                />
-
-                <AnimatedInput
-                  label="Password"
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter your password"
-                  icon={Lock}
-                  autoComplete="current-password"
-                  delay={0.2}
-                  showPasswordToggle={true}
-                />
-
-                <motion.div
-                  className="mb-6"
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45 }}
-                >
-                  <AnimatedCheckbox
-                    checked={stayLoggedIn}
-                    onChange={(e) => setStayLoggedIn(e.target.checked)}
-                    label="Stay logged in"
+                {/* shimmer */}
+                {isValid && !isLoading && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                    animate={{ x: ["-100%", "200%"] }}
+                    transition={{
+                      duration: 2.5,
+                      repeat: Infinity,
+                      repeatDelay: 1,
+                    }}
                   />
-                </motion.div>
+                )}
+              </motion.button>
+            </form>
 
-                <AnimatedButton
-                  type="submit"
-                  disabled={isLoading || !formData.username || !formData.password}
-                  isLoading={isLoading}
-                />
-              </motion.form>
-
-              {/* Features */}
-              <FeaturesList />
-            </div>
+            {/* Link to register */}
+            <motion.p
+              className="text-center text-sm text-gray-500"
+              variants={fade}
+              custom={5}
+              initial="hidden"
+              animate="show"
+            >
+              Don&apos;t have an account?{" "}
+              <Link
+                to="/register"
+                className="font-semibold text-blue-500 hover:text-blue-600 transition-colors"
+              >
+                Create Account
+              </Link>
+            </motion.p>
           </motion.div>
 
-          {/* Register Link Card */}
+          {/* Bottom badge */}
           <motion.div
-            className="mt-6 text-center bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg shadow-slate-200/30 border border-slate-200/60 py-5 px-6"
-            initial={{ opacity: 0, y: 25 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            whileHover={{
-              scale: 1.02,
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
-            }}
+            className="mt-6 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
           >
-            <motion.span
-              className="text-sm text-slate-500"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-            >
-              Don't have an account?{" "}
-            </motion.span>
-            <AnimatedLink to="/register">Register here</AnimatedLink>
+            <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <CheckCircle className="h-3 w-3 text-green-400" />
+              Secured with end-to-end encryption
+            </div>
           </motion.div>
         </motion.div>
       </main>
 
-      {/* Footer */}
-      <AnimatedFooter />
-    </motion.div>
-  );
-};
+      {/* ── Footer ── */}
+      <motion.footer
+        className="py-4 text-center text-xs text-gray-400"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        © {new Date().getFullYear()} Eleven Panel. All rights reserved.
+      </motion.footer>
 
-export default Login;
+      {/* ── Global CSS for blob animation ── */}
+      <style>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -40px) scale(1.08); }
+          66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+        .animate-blob { animation: blob 8s ease-in-out infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        @keyframes pulse-slow {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.5); }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+      `}</style>
+    </div>
+  );
+}

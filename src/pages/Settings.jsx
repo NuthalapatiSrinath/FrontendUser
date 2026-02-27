@@ -1,16 +1,79 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useSpring } from "framer-motion";
 import {
-  Settings as SettingsIcon, User, Mail, Lock, Eye, EyeOff, Shield,
-  Bell, Moon, Sun, Globe, Palette, Key, RefreshCw, Check, X,
-  CheckCircle, AlertCircle, AlertTriangle, ChevronRight, ChevronDown,
-  Camera, Upload, Edit, Save, Trash2, LogOut, Smartphone, Monitor,
-  Laptop, Fingerprint, Clock, Calendar, Hash, Star, Sparkles,
-  Zap, Award, Crown, Target, Heart, Activity, BarChart2, PieChart,
-  TrendingUp, ArrowUpRight, ArrowDownRight, Link, Bookmark, Tag,
-  Package, Gift, Rocket, Database, Cloud, Server, Cpu, Wifi, Terminal,
-  Code, Circle, Hexagon, Triangle, Diamond, Layers, CreditCard
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useMotionTemplate,
+  useSpring,
+} from "framer-motion";
+import {
+  Settings as SettingsIcon,
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Shield,
+  Bell,
+  Moon,
+  Sun,
+  Globe,
+  Palette,
+  Key,
+  RefreshCw,
+  Check,
+  X,
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  ChevronRight,
+  ChevronDown,
+  Camera,
+  Upload,
+  Edit,
+  Save,
+  Trash2,
+  LogOut,
+  Smartphone,
+  Monitor,
+  Laptop,
+  Fingerprint,
+  Clock,
+  Calendar,
+  Hash,
+  Star,
+  Sparkles,
+  Zap,
+  Award,
+  Crown,
+  Target,
+  Heart,
+  Activity,
+  BarChart2,
+  PieChart,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+  Link,
+  Bookmark,
+  Tag,
+  Package,
+  Gift,
+  Rocket,
+  Database,
+  Cloud,
+  Server,
+  Cpu,
+  Wifi,
+  Terminal,
+  Code,
+  Circle,
+  Hexagon,
+  Triangle,
+  Diamond,
+  Layers,
+  CreditCard,
 } from "lucide-react";
 import { logout } from "../store/slices/authSlice";
 import axiosInstance from "../api/axiosInstance";
@@ -24,7 +87,11 @@ const pageVariants = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.1 },
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.1,
+    },
   },
   exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
 };
@@ -47,7 +114,11 @@ const cardVariants = {
 
 const inputVariants = {
   initial: { opacity: 0, x: -20 },
-  animate: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  animate: {
+    opacity: 1,
+    x: 0,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
+  },
   focus: { scale: 1.02, boxShadow: "0 4px 20px -5px rgba(59, 130, 246, 0.2)" },
 };
 
@@ -59,7 +130,11 @@ const buttonVariants = {
 
 const sectionVariants = {
   initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 20 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 100, damping: 20 },
+  },
 };
 
 const switchVariants = {
@@ -69,7 +144,12 @@ const switchVariants = {
 
 const alertVariants = {
   initial: { opacity: 0, y: -20, scale: 0.95 },
-  animate: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 200, damping: 20 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 200, damping: 20 },
+  },
   exit: { opacity: 0, y: -20, scale: 0.95, transition: { duration: 0.2 } },
 };
 
@@ -80,12 +160,21 @@ const staggerContainerVariants = {
 
 const staggerItemVariants = {
   initial: { opacity: 0, y: 15 },
-  animate: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
+  },
 };
 
 const modalVariants = {
   initial: { opacity: 0, scale: 0.9, y: 20 },
-  animate: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 200, damping: 20 } },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 200, damping: 20 },
+  },
   exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } },
 };
 
@@ -163,7 +252,9 @@ const FloatingParticles = () => {
       size: Math.random() * 3 + 2,
       duration: Math.random() * 20 + 15,
       delay: Math.random() * 5,
-      color: ["bg-blue-400/15", "bg-indigo-400/15", "bg-purple-400/15"][Math.floor(Math.random() * 3)],
+      color: ["bg-blue-400/15", "bg-indigo-400/15", "bg-purple-400/15"][
+        Math.floor(Math.random() * 3)
+      ],
     }));
   }, []);
 
@@ -200,7 +291,16 @@ const FloatingParticles = () => {
 // ANIMATED INPUT COMPONENT
 // ============================================================================
 
-const AnimatedInput = ({ icon: Icon, label, type = "text", value, onChange, error, disabled, placeholder }) => {
+const AnimatedInput = ({
+  icon: Icon,
+  label,
+  type = "text",
+  value,
+  onChange,
+  error,
+  disabled,
+  placeholder,
+}) => {
   const [isFocused, setIsFocused] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -235,7 +335,11 @@ const AnimatedInput = ({ icon: Icon, label, type = "text", value, onChange, erro
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showPassword ? (
+              <EyeOff className="w-4 h-4" />
+            ) : (
+              <Eye className="w-4 h-4" />
+            )}
           </motion.button>
         )}
         {!error && isFocused && (
@@ -276,7 +380,9 @@ const AnimatedToggle = ({ isOn, onToggle, label, description }) => {
     >
       <div>
         <p className="text-sm font-medium text-slate-700">{label}</p>
-        {description && <p className="text-xs text-slate-400 mt-0.5">{description}</p>}
+        {description && (
+          <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+        )}
       </div>
       <motion.button
         onClick={onToggle}
@@ -344,7 +450,13 @@ const ProfileAvatar = ({ user, size = "large" }) => {
 // SETTINGS SECTION COMPONENT
 // ============================================================================
 
-const SettingsSection = ({ icon: Icon, title, description, children, delay = 0 }) => {
+const SettingsSection = ({
+  icon: Icon,
+  title,
+  description,
+  children,
+  delay = 0,
+}) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -370,10 +482,15 @@ const SettingsSection = ({ icon: Icon, title, description, children, delay = 0 }
           </motion.div>
           <div className="text-left">
             <h3 className="text-lg font-bold text-slate-800">{title}</h3>
-            {description && <p className="text-sm text-slate-500">{description}</p>}
+            {description && (
+              <p className="text-sm text-slate-500">{description}</p>
+            )}
           </div>
         </div>
-        <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2 }}>
+        <motion.div
+          animate={{ rotate: isExpanded ? 0 : -90 }}
+          transition={{ duration: 0.2 }}
+        >
           <ChevronDown className="w-5 h-5 text-slate-400" />
         </motion.div>
       </motion.button>
@@ -401,7 +518,8 @@ const SettingsSection = ({ icon: Icon, title, description, children, delay = 0 }
 
 const PasswordStrengthIndicator = ({ password }) => {
   const strength = useMemo(() => {
-    if (!password) return { score: 0, label: "Enter password", color: "bg-slate-200" };
+    if (!password)
+      return { score: 0, label: "Enter password", color: "bg-slate-200" };
     let score = 0;
     if (password.length >= 8) score++;
     if (password.length >= 12) score++;
@@ -410,8 +528,18 @@ const PasswordStrengthIndicator = ({ password }) => {
     if (/[^A-Za-z0-9]/.test(password)) score++;
 
     const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
-    const colors = ["bg-red-500", "bg-orange-500", "bg-amber-500", "bg-lime-500", "bg-emerald-500"];
-    return { score, label: labels[Math.min(score, 4)], color: colors[Math.min(score, 4)] };
+    const colors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-amber-500",
+      "bg-lime-500",
+      "bg-emerald-500",
+    ];
+    return {
+      score,
+      label: labels[Math.min(score, 4)],
+      color: colors[Math.min(score, 4)],
+    };
   }, [password]);
 
   return (
@@ -427,7 +555,9 @@ const PasswordStrengthIndicator = ({ password }) => {
           />
         ))}
       </div>
-      <p className={`text-xs ${strength.score >= 3 ? "text-emerald-600" : "text-slate-500"}`}>
+      <p
+        className={`text-xs ${strength.score >= 3 ? "text-emerald-600" : "text-slate-500"}`}
+      >
         {strength.label}
       </p>
     </div>
@@ -539,7 +669,9 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
               <LogOut className="w-10 h-10 text-red-500" />
             </motion.div>
 
-            <h3 className="text-2xl font-bold text-slate-800 mb-2">Sign Out?</h3>
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">
+              Sign Out?
+            </h3>
             <p className="text-slate-500 mb-8">
               Are you sure you want to sign out of your account?
             </p>
@@ -579,7 +711,13 @@ const AccountInfoDisplay = ({ user }) => {
     { icon: Mail, label: "Email", value: user?.email || "N/A" },
     { icon: Shield, label: "Role", value: user?.role || "user" },
     { icon: CreditCard, label: "Balance", value: `$${user?.balance || 0}` },
-    { icon: Calendar, label: "Member Since", value: user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A" },
+    {
+      icon: Calendar,
+      label: "Member Since",
+      value: user?.createdAt
+        ? new Date(user.createdAt).toLocaleDateString()
+        : "N/A",
+    },
   ];
 
   return (
@@ -632,10 +770,13 @@ const ChangePasswordForm = ({ onSuccess, onError }) => {
 
     // Validation
     const newErrors = {};
-    if (!currentPassword) newErrors.currentPassword = "Current password is required";
+    if (!currentPassword)
+      newErrors.currentPassword = "Current password is required";
     if (!newPassword) newErrors.newPassword = "New password is required";
-    if (newPassword.length < 6) newErrors.newPassword = "Password must be at least 6 characters";
-    if (newPassword !== confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (newPassword.length < 6)
+      newErrors.newPassword = "Password must be at least 6 characters";
+    if (newPassword !== confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -702,7 +843,11 @@ const ChangePasswordForm = ({ onSuccess, onError }) => {
         whileTap="tap"
       >
         {isLoading ? (
-          <motion.div className="flex items-center justify-center gap-2" variants={spinVariants} animate="animate">
+          <motion.div
+            className="flex items-center justify-center gap-2"
+            variants={spinVariants}
+            animate="animate"
+          >
             <RefreshCw className="w-5 h-5" />
             <span>Changing Password...</span>
           </motion.div>
@@ -736,11 +881,31 @@ const NotificationSettings = () => {
   };
 
   const notificationOptions = [
-    { key: "email", label: "Email Notifications", description: "Receive updates via email" },
-    { key: "push", label: "Push Notifications", description: "Browser push notifications" },
-    { key: "keyGenerated", label: "Key Generated", description: "When a new key is created" },
-    { key: "keyUsed", label: "Key Activated", description: "When a key is registered" },
-    { key: "security", label: "Security Alerts", description: "Important security updates" },
+    {
+      key: "email",
+      label: "Email Notifications",
+      description: "Receive updates via email",
+    },
+    {
+      key: "push",
+      label: "Push Notifications",
+      description: "Browser push notifications",
+    },
+    {
+      key: "keyGenerated",
+      label: "Key Generated",
+      description: "When a new key is created",
+    },
+    {
+      key: "keyUsed",
+      label: "Key Activated",
+      description: "When a key is registered",
+    },
+    {
+      key: "security",
+      label: "Security Alerts",
+      description: "Important security updates",
+    },
   ];
 
   return (
@@ -772,9 +937,24 @@ const AppearanceSettings = () => {
   const [theme, setTheme] = useState("light");
 
   const themes = [
-    { value: "light", label: "Light", icon: Sun, color: "from-amber-400 to-orange-400" },
-    { value: "dark", label: "Dark", icon: Moon, color: "from-slate-700 to-slate-900" },
-    { value: "system", label: "System", icon: Monitor, color: "from-blue-400 to-indigo-400" },
+    {
+      value: "light",
+      label: "Light",
+      icon: Sun,
+      color: "from-amber-400 to-orange-400",
+    },
+    {
+      value: "dark",
+      label: "Dark",
+      icon: Moon,
+      color: "from-slate-700 to-slate-900",
+    },
+    {
+      value: "system",
+      label: "System",
+      icon: Monitor,
+      color: "from-blue-400 to-indigo-400",
+    },
   ];
 
   return (
@@ -831,9 +1011,24 @@ const SecuritySettings = () => {
   const [twoFactor, setTwoFactor] = useState(false);
 
   const securityOptions = [
-    { key: "twoFactor", label: "Two-Factor Authentication", description: "Add an extra layer of security", enabled: twoFactor },
-    { key: "sessions", label: "Active Sessions", description: "Manage logged in devices", action: true },
-    { key: "activity", label: "Login Activity", description: "View recent login history", action: true },
+    {
+      key: "twoFactor",
+      label: "Two-Factor Authentication",
+      description: "Add an extra layer of security",
+      enabled: twoFactor,
+    },
+    {
+      key: "sessions",
+      label: "Active Sessions",
+      description: "Manage logged in devices",
+      action: true,
+    },
+    {
+      key: "activity",
+      label: "Login Activity",
+      description: "View recent login history",
+      action: true,
+    },
   ];
 
   return (
@@ -851,8 +1046,16 @@ const SecuritySettings = () => {
       />
 
       {[
-        { icon: Smartphone, label: "Active Sessions", description: "1 active session" },
-        { icon: Activity, label: "Login Activity", description: "View recent logins" },
+        {
+          icon: Smartphone,
+          label: "Active Sessions",
+          description: "1 active session",
+        },
+        {
+          icon: Activity,
+          label: "Login Activity",
+          description: "View recent logins",
+        },
       ].map((item, index) => {
         const IconComponent = item.icon;
         return (
@@ -966,10 +1169,16 @@ const Settings = () => {
       {/* Alerts */}
       <AnimatePresence>
         {successMessage && (
-          <SuccessAlert message={successMessage} onClose={() => setSuccessMessage("")} />
+          <SuccessAlert
+            message={successMessage}
+            onClose={() => setSuccessMessage("")}
+          />
         )}
         {errorMessage && (
-          <ErrorAlert message={errorMessage} onClose={() => setErrorMessage("")} />
+          <ErrorAlert
+            message={errorMessage}
+            onClose={() => setErrorMessage("")}
+          />
         )}
       </AnimatePresence>
 
@@ -995,7 +1204,9 @@ const Settings = () => {
             <SettingsIcon className="w-4 h-4" />
             <span>Account Settings</span>
           </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Settings</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
+            Settings
+          </h1>
           <p className="text-slate-500 max-w-xl mx-auto">
             Manage your account settings, preferences, and security options
           </p>
@@ -1064,7 +1275,9 @@ const Settings = () => {
                 whileHover={{ scale: 1.05 }}
               >
                 <Shield className="w-4 h-4" />
-                <span className="capitalize">{user?.role || "user"} Account</span>
+                <span className="capitalize">
+                  {user?.role || "user"} Account
+                </span>
               </motion.div>
             </div>
           </div>

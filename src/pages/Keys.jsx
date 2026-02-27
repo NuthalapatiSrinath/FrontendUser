@@ -1,15 +1,74 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useSpring } from "framer-motion";
 import {
-  Key, Search, Filter, ChevronLeft, ChevronRight, Copy, Eye, EyeOff,
-  Check, CheckCircle, XCircle, Clock, Shield, AlertCircle, RefreshCw,
-  Sparkles, Star, Zap, Award, Crown, Target, BarChart2, Activity,
-  TrendingUp, ArrowUpRight, ArrowDownRight, Calendar, Hash, Lock,
-  Unlock, Trash2, Edit, MoreVertical, Download, Upload, Server,
-  Database, Cloud, Globe, Wifi, Cpu, Layers, Package, Gift, Timer,
-  PlayCircle, PauseCircle, Settings, Bell, Circle, Hexagon, Triangle,
-  Diamond, Heart, Moon, Sun, Terminal, Code, Bookmark, Tag, Link
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useMotionTemplate,
+  useSpring,
+} from "framer-motion";
+import {
+  Key,
+  Search,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Eye,
+  EyeOff,
+  Check,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Shield,
+  AlertCircle,
+  RefreshCw,
+  Sparkles,
+  Star,
+  Zap,
+  Award,
+  Crown,
+  Target,
+  BarChart2,
+  Activity,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+  Calendar,
+  Hash,
+  Lock,
+  Unlock,
+  Trash2,
+  Edit,
+  MoreVertical,
+  Download,
+  Upload,
+  Server,
+  Database,
+  Cloud,
+  Globe,
+  Wifi,
+  Cpu,
+  Layers,
+  Package,
+  Gift,
+  Timer,
+  PlayCircle,
+  PauseCircle,
+  Settings,
+  Bell,
+  Circle,
+  Hexagon,
+  Triangle,
+  Diamond,
+  Heart,
+  Moon,
+  Sun,
+  Terminal,
+  Code,
+  Bookmark,
+  Tag,
+  Link,
 } from "lucide-react";
 import { getKeys, deleteKey } from "../store/slices/keysSlice";
 import { formatTimeFromNow, formatDateTime } from "../utils/timeUtils";
@@ -23,7 +82,11 @@ const pageVariants = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.1 },
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.1,
+    },
   },
   exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
 };
@@ -46,17 +109,17 @@ const cardVariants = {
 
 const tableRowVariants = {
   initial: { opacity: 0, x: -30, scale: 0.98 },
-  animate: { 
-    opacity: 1, 
-    x: 0, 
+  animate: {
+    opacity: 1,
+    x: 0,
     scale: 1,
-    transition: { type: "spring", stiffness: 100, damping: 20 } 
+    transition: { type: "spring", stiffness: 100, damping: 20 },
   },
-  hover: { 
-    backgroundColor: "rgba(99, 102, 241, 0.05)", 
+  hover: {
+    backgroundColor: "rgba(99, 102, 241, 0.05)",
     x: 5,
     scale: 1.005,
-    transition: { duration: 0.2 } 
+    transition: { duration: 0.2 },
   },
   exit: { opacity: 0, x: 30, scale: 0.98 },
 };
@@ -69,12 +132,20 @@ const buttonVariants = {
 
 const searchVariants = {
   initial: { width: "200px" },
-  focused: { width: "300px", transition: { type: "spring", stiffness: 200, damping: 20 } },
+  focused: {
+    width: "300px",
+    transition: { type: "spring", stiffness: 200, damping: 20 },
+  },
 };
 
 const filterDropdownVariants = {
   initial: { opacity: 0, y: -10, scale: 0.95 },
-  animate: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 25 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 300, damping: 25 },
+  },
   exit: { opacity: 0, y: -10, scale: 0.95, transition: { duration: 0.2 } },
 };
 
@@ -108,12 +179,21 @@ const staggerContainerVariants = {
 
 const staggerItemVariants = {
   initial: { opacity: 0, y: 15 },
-  animate: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 100, damping: 15 },
+  },
 };
 
 const modalVariants = {
   initial: { opacity: 0, scale: 0.9, y: 20 },
-  animate: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 200, damping: 20 } },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 200, damping: 20 },
+  },
   exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } },
 };
 
@@ -167,7 +247,9 @@ const FloatingParticles = () => {
       size: Math.random() * 3 + 2,
       duration: Math.random() * 18 + 12,
       delay: Math.random() * 5,
-      color: ["bg-indigo-400/20", "bg-purple-400/20", "bg-blue-400/20"][Math.floor(Math.random() * 3)],
+      color: ["bg-indigo-400/20", "bg-purple-400/20", "bg-blue-400/20"][
+        Math.floor(Math.random() * 3)
+      ],
     }));
   }, []);
 
@@ -255,7 +337,12 @@ const AnimatedSearchInput = ({ value, onChange, placeholder }) => {
 // FILTER DROPDOWN
 // ============================================================================
 
-const FilterDropdown = ({ isOpen, onToggle, selectedFilter, onSelectFilter }) => {
+const FilterDropdown = ({
+  isOpen,
+  onToggle,
+  selectedFilter,
+  onSelectFilter,
+}) => {
   const filters = [
     { value: "all", label: "All Keys", icon: Key },
     { value: "active", label: "Active", icon: CheckCircle },
@@ -273,7 +360,9 @@ const FilterDropdown = ({ isOpen, onToggle, selectedFilter, onSelectFilter }) =>
         whileTap="tap"
       >
         <Filter className="w-5 h-5 text-slate-400" />
-        <span className="font-medium">{filters.find(f => f.value === selectedFilter)?.label || "Filter"}</span>
+        <span className="font-medium">
+          {filters.find((f) => f.value === selectedFilter)?.label || "Filter"}
+        </span>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
           <ChevronRight className="w-4 h-4 rotate-90" />
         </motion.div>
@@ -332,15 +421,30 @@ const FilterDropdown = ({ isOpen, onToggle, selectedFilter, onSelectFilter }) =>
 const StatsOverview = ({ keys }) => {
   const stats = useMemo(() => {
     const total = keys?.length || 0;
-    const active = keys?.filter(k => k.registration?.hwid)?.length || 0;
+    const active = keys?.filter((k) => k.registration?.hwid)?.length || 0;
     const inactive = total - active;
     return { total, active, inactive };
   }, [keys]);
 
   const statItems = [
-    { label: "Total Keys", value: stats.total, icon: Key, color: "from-indigo-500 to-blue-500" },
-    { label: "Active", value: stats.active, icon: CheckCircle, color: "from-emerald-500 to-teal-500" },
-    { label: "Inactive", value: stats.inactive, icon: Clock, color: "from-amber-500 to-orange-500" },
+    {
+      label: "Total Keys",
+      value: stats.total,
+      icon: Key,
+      color: "from-indigo-500 to-blue-500",
+    },
+    {
+      label: "Active",
+      value: stats.active,
+      icon: CheckCircle,
+      color: "from-emerald-500 to-teal-500",
+    },
+    {
+      label: "Inactive",
+      value: stats.inactive,
+      icon: Clock,
+      color: "from-amber-500 to-orange-500",
+    },
   ];
 
   return (
@@ -452,7 +556,9 @@ const KeyRow = ({ keyData, index, onView, onCopy, onDelete }) => {
                 className="font-mono text-sm text-slate-800 truncate max-w-[200px]"
                 animate={{ opacity: showKey ? 1 : 0.8 }}
               >
-                {showKey ? keyData.key : `${keyData.key?.slice(0, 12)}${"•".repeat(8)}`}
+                {showKey
+                  ? keyData.key
+                  : `${keyData.key?.slice(0, 12)}${"•".repeat(8)}`}
               </motion.p>
               <motion.button
                 onClick={() => setShowKey(!showKey)}
@@ -460,7 +566,11 @@ const KeyRow = ({ keyData, index, onView, onCopy, onDelete }) => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showKey ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </motion.button>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -504,7 +614,9 @@ const KeyRow = ({ keyData, index, onView, onCopy, onDelete }) => {
           <motion.button
             onClick={handleCopy}
             className={`p-2 rounded-lg transition-colors ${
-              copied ? "bg-emerald-100 text-emerald-600" : "hover:bg-slate-100 text-slate-400"
+              copied
+                ? "bg-emerald-100 text-emerald-600"
+                : "hover:bg-slate-100 text-slate-400"
             }`}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -560,9 +672,22 @@ const KeyDetailsModal = ({ keyData, isOpen, onClose }) => {
 
   const details = [
     { icon: Key, label: "License Key", value: keyData.key, mono: true },
-    { icon: isActive ? CheckCircle : Clock, label: "Status", value: isActive ? "Active" : "Inactive" },
-    { icon: Shield, label: "HWID", value: keyData.registration?.hwid || "Not registered", mono: true },
-    { icon: Calendar, label: "Created", value: formatDateTime(keyData.createdAt) },
+    {
+      icon: isActive ? CheckCircle : Clock,
+      label: "Status",
+      value: isActive ? "Active" : "Inactive",
+    },
+    {
+      icon: Shield,
+      label: "HWID",
+      value: keyData.registration?.hwid || "Not registered",
+      mono: true,
+    },
+    {
+      icon: Calendar,
+      label: "Created",
+      value: formatDateTime(keyData.createdAt),
+    },
     { icon: Hash, label: "Key ID", value: keyData._id, mono: true },
   ];
 
@@ -604,8 +729,12 @@ const KeyDetailsModal = ({ keyData, isOpen, onClose }) => {
                   <Key className="w-6 h-6 text-white" />
                 </motion.div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Key Details</h3>
-                  <p className="text-xs text-slate-500">View license key information</p>
+                  <h3 className="text-lg font-bold text-slate-800">
+                    Key Details
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    View license key information
+                  </p>
                 </div>
               </div>
               <motion.button
@@ -634,8 +763,12 @@ const KeyDetailsModal = ({ keyData, isOpen, onClose }) => {
                 >
                   <IconComponent className="w-5 h-5 text-indigo-500 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-400 mb-0.5">{item.label}</p>
-                    <p className={`text-sm text-slate-700 break-all ${item.mono ? "font-mono" : ""}`}>
+                    <p className="text-xs text-slate-400 mb-0.5">
+                      {item.label}
+                    </p>
+                    <p
+                      className={`text-sm text-slate-700 break-all ${item.mono ? "font-mono" : ""}`}
+                    >
                       {item.value}
                     </p>
                   </div>
@@ -688,7 +821,13 @@ const KeyDetailsModal = ({ keyData, isOpen, onClose }) => {
 // DELETE CONFIRMATION MODAL
 // ============================================================================
 
-const DeleteConfirmModal = ({ keyData, isOpen, onClose, onConfirm, isLoading }) => {
+const DeleteConfirmModal = ({
+  keyData,
+  isOpen,
+  onClose,
+  onConfirm,
+  isLoading,
+}) => {
   if (!isOpen || !keyData) return null;
 
   return (
@@ -727,9 +866,12 @@ const DeleteConfirmModal = ({ keyData, isOpen, onClose, onConfirm, isLoading }) 
               <Trash2 className="w-8 h-8 text-red-500" />
             </motion.div>
 
-            <h3 className="text-xl font-bold text-slate-800 mb-2">Delete Key?</h3>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              Delete Key?
+            </h3>
             <p className="text-slate-500 mb-6">
-              Are you sure you want to delete this key? This action cannot be undone.
+              Are you sure you want to delete this key? This action cannot be
+              undone.
             </p>
 
             <motion.div
@@ -760,7 +902,11 @@ const DeleteConfirmModal = ({ keyData, isOpen, onClose, onConfirm, isLoading }) 
                 {isLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="inline-block"
                   >
                     <RefreshCw className="w-5 h-5" />
@@ -866,7 +1012,8 @@ const EmptyState = () => {
       </motion.div>
       <h3 className="text-xl font-bold text-slate-700 mb-2">No Keys Found</h3>
       <p className="text-slate-500 mb-6 max-w-md mx-auto">
-        You haven't generated any license keys yet. Start by generating your first key!
+        You haven't generated any license keys yet. Start by generating your
+        first key!
       </p>
       <motion.button
         className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-lg shadow-indigo-500/30"
@@ -927,7 +1074,9 @@ const Keys = () => {
       result = result.filter(
         (key) =>
           key.key?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          key.registration?.hwid?.toLowerCase().includes(searchQuery.toLowerCase())
+          key.registration?.hwid
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -993,8 +1142,12 @@ const Keys = () => {
               <Key className="w-4 h-4" />
               <span>Key Management</span>
             </motion.div>
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Your License Keys</h1>
-            <p className="text-slate-500 mt-1">Manage and monitor all your generated keys</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-800">
+              Your License Keys
+            </h1>
+            <p className="text-slate-500 mt-1">
+              Manage and monitor all your generated keys
+            </p>
           </div>
 
           <motion.button
@@ -1041,7 +1194,8 @@ const Keys = () => {
           />
 
           <div className="ml-auto text-sm text-slate-500">
-            {filteredKeys.length} key{filteredKeys.length !== 1 ? "s" : ""} found
+            {filteredKeys.length} key{filteredKeys.length !== 1 ? "s" : ""}{" "}
+            found
           </div>
         </motion.div>
 
@@ -1063,17 +1217,19 @@ const Keys = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200/60">
-                      {["#", "License Key", "Status", "HWID", "Actions"].map((header, i) => (
-                        <motion.th
-                          key={header}
-                          className="px-5 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                        >
-                          {header}
-                        </motion.th>
-                      ))}
+                      {["#", "License Key", "Status", "HWID", "Actions"].map(
+                        (header, i) => (
+                          <motion.th
+                            key={header}
+                            className="px-5 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                          >
+                            {header}
+                          </motion.th>
+                        ),
+                      )}
                     </tr>
                   </thead>
                   <tbody>

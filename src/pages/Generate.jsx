@@ -1,14 +1,67 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion, AnimatePresence, useMotionValue, useMotionTemplate, useSpring, useTransform } from "framer-motion";
 import {
-  Key, Wallet, Plus, Sparkles, Check, Copy, Download, Shield, Zap,
-  AlertCircle, Clock, RefreshCw, Star, Crown, Award, Target, Rocket,
-  Gift, Package, CreditCard, Activity, TrendingUp, ChevronRight,
-  Circle, Hexagon, Triangle, Diamond, Layers, Heart, Moon, Sun,
-  CheckCircle, XCircle, Timer, PlayCircle, PauseCircle, Settings,
-  Bell, Search, ArrowUpRight, ArrowDownRight, Eye, EyeOff, Hash,
-  Lock, Unlock, Database, Cloud, Server, Cpu, Globe, Wifi, Terminal
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useMotionTemplate,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import {
+  Key,
+  Wallet,
+  Plus,
+  Sparkles,
+  Check,
+  Copy,
+  Download,
+  Shield,
+  Zap,
+  AlertCircle,
+  Clock,
+  RefreshCw,
+  Star,
+  Crown,
+  Award,
+  Target,
+  Rocket,
+  Gift,
+  Package,
+  CreditCard,
+  Activity,
+  TrendingUp,
+  ChevronRight,
+  Circle,
+  Hexagon,
+  Triangle,
+  Diamond,
+  Layers,
+  Heart,
+  Moon,
+  Sun,
+  CheckCircle,
+  XCircle,
+  Timer,
+  PlayCircle,
+  PauseCircle,
+  Settings,
+  Bell,
+  Search,
+  ArrowUpRight,
+  ArrowDownRight,
+  Eye,
+  EyeOff,
+  Hash,
+  Lock,
+  Unlock,
+  Database,
+  Cloud,
+  Server,
+  Cpu,
+  Globe,
+  Wifi,
+  Terminal,
 } from "lucide-react";
 import { generateKey } from "../store/slices/keysSlice";
 
@@ -21,7 +74,11 @@ const pageVariants = {
   animate: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.1 },
+    transition: {
+      duration: 0.6,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.1,
+    },
   },
   exit: { opacity: 0, y: -20, transition: { duration: 0.4 } },
 };
@@ -44,7 +101,7 @@ const cardVariants = {
 
 const buttonVariants = {
   initial: { scale: 1 },
-  hover: { 
+  hover: {
     scale: 1.02,
     boxShadow: "0 10px 30px -5px rgba(59, 130, 246, 0.4)",
   },
@@ -167,7 +224,9 @@ const FloatingParticles = () => {
       size: Math.random() * 4 + 2,
       duration: Math.random() * 20 + 10,
       delay: Math.random() * 5,
-      color: ["bg-purple-400/20", "bg-pink-400/20", "bg-blue-400/20"][Math.floor(Math.random() * 3)],
+      color: ["bg-purple-400/20", "bg-pink-400/20", "bg-blue-400/20"][
+        Math.floor(Math.random() * 3)
+      ],
     }));
   }, []);
 
@@ -290,7 +349,9 @@ const SuccessCelebration = ({ onComplete }) => {
   const confettiPieces = useMemo(() => {
     return Array.from({ length: 50 }, (_, i) => ({
       id: i,
-      color: ["#8B5CF6", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"][Math.floor(Math.random() * 5)],
+      color: ["#8B5CF6", "#EC4899", "#3B82F6", "#10B981", "#F59E0B"][
+        Math.floor(Math.random() * 5)
+      ],
       size: Math.random() * 10 + 5,
       shape: ["circle", "square", "triangle"][Math.floor(Math.random() * 3)],
     }));
@@ -311,8 +372,16 @@ const SuccessCelebration = ({ onComplete }) => {
             width: piece.size,
             height: piece.size,
             backgroundColor: piece.color,
-            borderRadius: piece.shape === "circle" ? "50%" : piece.shape === "triangle" ? "0" : "2px",
-            clipPath: piece.shape === "triangle" ? "polygon(50% 0%, 0% 100%, 100% 100%)" : "none",
+            borderRadius:
+              piece.shape === "circle"
+                ? "50%"
+                : piece.shape === "triangle"
+                  ? "0"
+                  : "2px",
+            clipPath:
+              piece.shape === "triangle"
+                ? "polygon(50% 0%, 0% 100%, 100% 100%)"
+                : "none",
           }}
           variants={confettiVariants}
           initial="initial"
@@ -392,7 +461,9 @@ const BalanceCard = ({ balance }) => {
             <Wallet className="w-6 h-6 text-white" />
           </motion.div>
           <div>
-            <h3 className="text-white/80 text-sm font-medium">Available Balance</h3>
+            <h3 className="text-white/80 text-sm font-medium">
+              Available Balance
+            </h3>
             <p className="text-white/60 text-xs">Ready to generate keys</p>
           </div>
         </motion.div>
@@ -640,7 +711,9 @@ const GeneratedKeyDisplay = ({ keyData, onCopy, copied }) => {
           >
             <Key className="w-4 h-4 text-white" />
           </motion.div>
-          <span className="text-slate-400 text-sm font-medium">License Key</span>
+          <span className="text-slate-400 text-sm font-medium">
+            License Key
+          </span>
         </div>
 
         <motion.p
@@ -735,7 +808,9 @@ const GeneratedKeyDisplay = ({ keyData, onCopy, copied }) => {
               <IconComponent className="w-5 h-5 text-slate-400" />
               <div>
                 <p className="text-xs text-slate-400">{item.label}</p>
-                <p className="text-sm font-medium text-slate-700">{item.value}</p>
+                <p className="text-sm font-medium text-slate-700">
+                  {item.value}
+                </p>
               </div>
             </motion.div>
           );
@@ -846,7 +921,9 @@ const PricingInfoCard = () => {
           <motion.div
             key={index}
             className={`flex items-center justify-between p-3 rounded-xl ${
-              item.highlight ? "bg-purple-50 border border-purple-200" : "bg-slate-50"
+              item.highlight
+                ? "bg-purple-50 border border-purple-200"
+                : "bg-slate-50"
             }`}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -854,7 +931,9 @@ const PricingInfoCard = () => {
             whileHover={{ x: 5 }}
           >
             <span className="text-sm text-slate-600">{item.label}</span>
-            <span className={`font-bold ${item.highlight ? "text-purple-600" : "text-slate-700"}`}>
+            <span
+              className={`font-bold ${item.highlight ? "text-purple-600" : "text-slate-700"}`}
+            >
               {item.value}
             </span>
           </motion.div>
@@ -997,7 +1076,9 @@ const Generate = () => {
 
       {/* Success Celebration */}
       <AnimatePresence>
-        {showCelebration && <SuccessCelebration onComplete={handleCelebrationComplete} />}
+        {showCelebration && (
+          <SuccessCelebration onComplete={handleCelebrationComplete} />
+        )}
       </AnimatePresence>
 
       <div className="relative z-10 p-6 max-w-6xl mx-auto space-y-6">
@@ -1019,7 +1100,8 @@ const Generate = () => {
             Generate License Keys
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto">
-            Create secure, unique license keys instantly. Each key costs $1 from your balance.
+            Create secure, unique license keys instantly. Each key costs $1 from
+            your balance.
           </p>
         </motion.div>
 
@@ -1062,7 +1144,9 @@ const Generate = () => {
                   >
                     <Key className="w-10 h-10 text-purple-400" />
                   </motion.div>
-                  <h3 className="text-xl font-bold text-slate-700 mb-2">Ready to Generate</h3>
+                  <h3 className="text-xl font-bold text-slate-700 mb-2">
+                    Ready to Generate
+                  </h3>
                   <p className="text-slate-500 mb-6">
                     Click the button to generate your new license key
                   </p>
@@ -1071,7 +1155,9 @@ const Generate = () => {
                     animate={{ y: [0, -5, 0] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   >
-                    <span className="text-sm font-medium">Your key will appear here</span>
+                    <span className="text-sm font-medium">
+                      Your key will appear here
+                    </span>
                     <ChevronRight className="w-4 h-4" />
                   </motion.div>
                 </motion.div>
